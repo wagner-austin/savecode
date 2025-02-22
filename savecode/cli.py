@@ -1,49 +1,20 @@
 """
-cli.py - Save Python code from directories and files into one output file.
+savecode/cli.py - Entry point for savecode system. Aggregates plugins to gather and save Python code.
 Version: 1.2.1
 """
 
-import os
 import argparse
-
-def gather_py_files(root_dir, skip_dirs=None):
-    """
-    Recursively gather all .py files under root_dir,
-    skipping any directories listed in skip_dirs.
-    """
-    skip_dirs = set(skip_dirs or [])
-    py_files = []
-    current_file = os.path.abspath(__file__)
-    for dirpath, dirnames, filenames in os.walk(root_dir):
-        # Remove directories that should be skipped so os.walk won’t traverse them.
-        dirnames[:] = [d for d in dirnames if d not in skip_dirs]
-        for fname in filenames:
-            if fname.endswith(".py"):
-                file_path = os.path.join(dirpath, fname)
-                # Skip the current script (cli.py)
-                if os.path.abspath(file_path) == current_file:
-                    continue
-                py_files.append(file_path)
-    return py_files
-
-def save_code(py_files, output_file):
-    """
-    Save the code from each Python file in py_files to output_file.
-    Each file's code is preceded by a header (with the file path)
-    and separated by blank lines.
-    """
-    with open(output_file, 'w', encoding='utf-8') as out:
-        for file in py_files:
-            try:
-                with open(file, 'r', encoding='utf-8') as f:
-                    header = f"\nFile: {file}\n\n"
-                    out.write(header)
-                    out.write(f.read())
-                    out.write("\n\n")
-            except Exception as e:
-                print(f"Error reading {file}: {e}")
+import os
+# Import the plugins package to ensure all plugins are registered.
+import savecode.plugins
+from savecode.manager.manager import run_plugins
+from savecode.utils.output_manager import configure_output_path
 
 def main():
+    """
+    Main entry point for the savecode CLI.
+    Parses command-line arguments, builds a shared context, and runs the plugins.
+    """
     parser = argparse.ArgumentParser(
         description="Save the full code from Python files in specified directories and individual files to a single output file."
     )
@@ -62,7 +33,7 @@ def main():
     parser.add_argument(
         '-o', '--output',
         default="./temp.txt",
-        help="Output file path. Defaults to './temp.txt' (in the same directory as cli.py)."
+        help="Output file path. Defaults to './temp.txt'."
     )
     parser.add_argument(
         '--skip',
@@ -72,41 +43,49 @@ def main():
     )
     args = parser.parse_args()
 
-    all_py_files = []
+    # Build a shared context for all plugins.
+    context = {
+        'roots': args.roots,
+        'files': args.files,
+        'skip': args.skip,
+        'output': configure_output_path(args.output)
+    }
 
-    # Gather Python files from specified directories.
-    for root in args.roots:
-        all_py_files.extend(gather_py_files(root, args.skip))
+    run_plugins(context)
 
-    # Add individual Python files, ensuring they exist and have the correct extension.
-    for file in args.files:
-        if os.path.isfile(file) and file.endswith(".py"):
-            # Skip the current script (cli.py)
-            if os.path.abspath(file) == os.path.abspath(__file__):
-                continue
-            all_py_files.append(file)
-        else:
-            print(f"Warning: {file} is not a valid Python file.")
-
-    # Set output file to temp.txt in the same directory as cli.py if the default is used.
-    if args.output == "./temp.txt":
-        script_dir = os.path.dirname(os.path.abspath(__file__))
-        output_file = os.path.join(script_dir, "temp.txt")
-    else:
-        output_file = args.output
-
-    save_code(all_py_files, output_file)
-
-    # Print the list of saved files with colors.
+    # After plugins run, display a summary.
+    all_py_files = context.get('all_py_files', [])
     green = "\033[1;32m"
     blue = "\033[1;34m"
     cyan = "\033[1;36m"
     reset = "\033[0m"
-    print(f"\n{cyan}Saved code from {len(all_py_files)} files to {output_file}{reset}")
+    print(f"\n{cyan}Saved code from {len(all_py_files)} files to {context['output']}{reset}")
     print(f"\n{green}Files saved:{reset}")
     for f in all_py_files:
-        print(f"{blue}- {f}{reset}")
+        # Convert each absolute file path to a relative path from the current working directory.
+        rel_path = os.path.relpath(f, os.getcwd())
+        print(f"{blue}- {rel_path}{reset}")
     print("\n")
 
 if __name__ == "__main__":
     main()
+
+
+# RELEASE Process (DON'T DELETE)
+# ----------------
+# 1. Update the version in setup.py and savecode/__init__.py.
+#
+# 2. Commit your changes.
+#
+# 3. Create a release tag with a 'v' prefix (e.g., "v1.2.3"):
+#      git tag v1.2.3
+#
+# 4. Push your tags (if your remote isn't named 'origin', use its name):
+#      git push origin --tags
+#
+# 5. The GitHub Actions workflow (in .github/workflows/publish.yml) is triggered by
+#    tag pushes (tags matching "v*") to automatically build and publish your package to PyPI.
+#
+# Note: Regular commits don't trigger the release workflow—only pushing a new tag does.
+
+#rebuild: python setup.py sdist bdist_wheel
