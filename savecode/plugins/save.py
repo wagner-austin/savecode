@@ -1,5 +1,8 @@
 """
-savecode/plugins/save.py - Plugin to save code from Python files into a single output file.
+savecode/plugins/save.py - Plugin to save code from Python files.
+
+This module defines a plugin that reads Python files and writes their contents
+to a designated output file, aggregating any errors encountered during file operations.
 """
 
 import os
@@ -7,24 +10,28 @@ import logging
 from typing import Any, Dict, List
 from savecode.plugin_manager.manager import register_plugin
 from savecode.utils.path_utils import relative_path
+from savecode.utils.error_handler import log_and_record_error
 
 logger = logging.getLogger('savecode.plugins.save')
 
 @register_plugin
 class SavePlugin:
-    """
-    Reads Python files and writes their content to a designated output file.
-    Aggregates errors encountered during file operations.
-    """
+    """Plugin that saves the content of Python files to a single output file."""
+    
     def run(self, context: Dict[str, Any]) -> None:
-        """
-        Execute the saving process.
-        
+        """Execute the saving process.
+
         Expects in context:
-          - 'all_py_files': list of Python file paths.
-          - 'output': output file path.
-          
+          - 'all_py_files': List of Python file paths.
+          - 'output': Output file path.
+
         Aggregates errors in context['errors'].
+
+        Args:
+            context (Dict[str, Any]): Shared context containing file lists, output path, etc.
+
+        Returns:
+            None
         """
         all_py_files: List[str] = context.get('all_py_files', [])
         output_file: str = context.get('output', "./temp.txt")
@@ -43,11 +50,9 @@ class SavePlugin:
                             out.write(header)
                             out.write(f.read())
                             out.write("\n\n")
-                    except (OSError, UnicodeDecodeError) as e:
+                    except Exception as e:
                         error_msg = f"Error reading {file}: {e}"
-                        logger.error(error_msg)
-                        context.setdefault('errors', []).append(error_msg)
-        except OSError as e:
+                        log_and_record_error(error_msg, context, logger, exc_info=True)
+        except Exception as e:
             error_msg = f"Error writing to output file {output_file}: {e}"
-            logger.error(error_msg)
-            context.setdefault('errors', []).append(error_msg)
+            log_and_record_error(error_msg, context, logger, exc_info=True)

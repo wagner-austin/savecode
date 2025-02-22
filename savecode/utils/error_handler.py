@@ -1,27 +1,32 @@
 """
 savecode/utils/error_handler.py - Helper functions for error logging and aggregation.
+
 Provides a unified function to log messages and record them in the shared context.
 """
 
 from typing import Dict
 import logging
 
-def log_and_record_error(message: str, context: Dict[str, any], logger: logging.Logger, level: str = "error") -> None:
-    """
-    Logs a message using the provided logger at the specified level and appends the message to the context's errors list.
-    
-    :param message: The message to log and record.
-    :param context: The shared context dictionary.
-    :param logger: The logger to use for logging.
-    :param level: The logging level: "error", "warning", or "info" (default is "error").
+def log_and_record_error(message: str, context: Dict[str, any], logger: logging.Logger, level: str = "error", **kwargs) -> None:
+    """Log a message and record it in the context's error list.
+
+    Args:
+        message (str): The error message to log and record.
+        context (Dict[str, any]): The shared context dictionary where errors are aggregated.
+        logger (logging.Logger): The logger instance to use for logging.
+        level (str, optional): Logging level; one of "error", "warning", "info", or "debug". Defaults to "error".
+        **kwargs: Additional keyword arguments to pass to the logger (e.g., exc_info=True).
+
+    Returns:
+        None
     """
     level = level.lower()
     if level == "error":
-        logger.error(message)
+        logger.error(message, **kwargs)
     elif level == "warning":
-        logger.warning(message)
+        logger.warning(message, **kwargs)
     elif level == "info":
-        logger.info(message)
+        logger.info(message, **kwargs)
     else:
-        logger.debug(message)
+        logger.debug(message, **kwargs)
     context.setdefault('errors', []).append(message)

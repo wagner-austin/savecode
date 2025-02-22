@@ -31,10 +31,14 @@ class TestPlugins(unittest.TestCase):
         """
         Verify that an invalid file in the 'files' list is logged as an error and not gathered.
         """
+        # Create temporary invalid file (non-.py) and valid .py file, ensuring they are cleaned up.
         with tempfile.NamedTemporaryFile(suffix=".txt", delete=False) as tmp:
             invalid_file = tmp.name
+        self.addCleanup(lambda: os.path.exists(invalid_file) and os.remove(invalid_file))
+        
         with tempfile.NamedTemporaryFile(suffix=".py", delete=False) as tmp2:
             valid_file = tmp2.name
+        self.addCleanup(lambda: os.path.exists(valid_file) and os.remove(valid_file))
         
         context = {
             'roots': [],
@@ -49,10 +53,6 @@ class TestPlugins(unittest.TestCase):
         self.assertIn(valid_file, context.get('all_py_files', []))
         self.assertNotIn(invalid_file, context.get('all_py_files', []))
         self.assertTrue(any("is not a valid Python file" in error for error in context['errors']))
-        
-        # Cleanup temporary files.
-        os.remove(invalid_file)
-        os.remove(valid_file)
     
     def test_valid_directory_gathering(self):
         """

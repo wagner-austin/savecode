@@ -1,6 +1,9 @@
 """
-savecode/cli.py - Entry point for savecode system. Aggregates plugins to gather and save Python code.
-This version aggregates errors encountered during plugin execution and reports them before exiting.
+savecode/cli.py - Entry point for the savecode CLI tool.
+
+This module provides the main() function to parse command-line arguments,
+build a shared context, execute registered plugins, display a summary of saved files,
+and handle any errors encountered during execution.
 """
 
 import argparse
@@ -13,14 +16,21 @@ import savecode.plugins
 from savecode.plugin_manager.manager import run_plugins
 from savecode.utils.output_manager import configure_output_path
 from savecode.utils.colors import GREEN, BLUE, CYAN, RESET
-from savecode.utils.display import display_summary     # Import display module for summary output
+from savecode.utils.display import display_summary
+from savecode.utils.logger import configure_logging  # Explicit logging configuration
 
 def main() -> None:
-    """
-    Main entry point for the savecode CLI.
-    Parses command-line arguments, builds a shared context, runs the plugins,
+    """Main entry point for the savecode CLI.
+
+    Parses command-line arguments, builds a shared context, executes registered plugins,
     displays a summary of the saved files, and reports any errors encountered.
+
+    Returns:
+        None
     """
+    # Explicitly configure logging here to avoid side effects during package import.
+    configure_logging()
+    
     parser = argparse.ArgumentParser(
         description="Save the full code from Python files in specified directories and individual files to a single output file."
     )
