@@ -1,8 +1,9 @@
 """
-savecode/plugins/save.py - Plugin to save code from Python files into a single output file.
+save.py - Plugin to save code from Python files into a single output file with enhanced error handling.
 """
 
 import os
+import sys
 import logging
 from typing import Any, Dict, List
 from savecode.manager.manager import register_plugin
@@ -12,7 +13,13 @@ logger = logging.getLogger(__name__)
 @register_plugin
 class SavePlugin:
     """
-    Plugin that reads Python files and writes their content to a designated output file.
+    Plugin that reads Python files and writes their content to a designated output file with enhanced error handling.
+    
+    Fatal error:
+      - If the output file cannot be written, the process will terminate with a nonzero exit code.
+      
+    Non-fatal error:
+      - If individual files cannot be read, the error is logged and processing continues.
     """
     def run(self, context: Dict[str, Any]) -> None:
         """
@@ -46,3 +53,4 @@ class SavePlugin:
                         logger.error("Error reading %s: %s", file, e)
         except OSError as e:
             logger.error("Error writing to output file %s: %s", output_file, e)
+            sys.exit(1)  # Terminate the program if the output file cannot be written
