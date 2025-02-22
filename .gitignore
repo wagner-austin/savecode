@@ -1,0 +1,14 @@
+# .gitignore - Specifies intentionally untracked files to ignore
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Build artifacts (generated during package builds)
+build/
+dist/
+*.egg-info/
+
+# Temporary files
+temp.txt

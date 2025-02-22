@@ -3,10 +3,11 @@ setup.py - Packaging configuration for the savecode tool.
 """
 
 from setuptools import setup, find_packages
+from savecode import __version__
 
 setup(
     name='savecode',
-    version='1.2.6',
+    version=__version__,
     description='Save Python code from directories and files into one output file.',
     author='Austin Wagner',
     author_email='austinwagner@msn.com',

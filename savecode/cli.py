@@ -1,9 +1,10 @@
 """
-savecode/cli.py - Entry point for savecode system. Aggregates plugins to gather and save Python code.
+cli.py - Entry point for savecode system. Aggregates plugins to gather and save Python code.
 """
 
 import argparse
 import os
+from savecode import __version__
 # Import the plugins package to ensure all plugins are registered.
 import savecode.plugins
 from savecode.manager.manager import run_plugins
@@ -40,18 +41,27 @@ def main():
         default=['rnn_src'],
         help="Subdirectory names to skip (default: ['rnn_src'])."
     )
-    args = parser.parse_args()
-
+    # Add version flag.
+    parser.add_argument(
+        '-v', '--version',
+        action='version',
+        version=f"%(prog)s {__version__}",
+        help="Show program's version number and exit."
+    )
+    # Allow additional unknown arguments for future expansion.
+    args, extra_args = parser.parse_known_args()
+    
     # Build a shared context for all plugins.
     context = {
         'roots': args.roots,
         'files': args.files,
         'skip': args.skip,
-        'output': configure_output_path(args.output)
+        'output': configure_output_path(args.output),
+        'extra_args': extra_args
     }
-
+    
     run_plugins(context)
-
+    
     # After plugins run, display a summary.
     all_py_files = context.get('all_py_files', [])
     green = "\033[1;32m"
@@ -65,19 +75,18 @@ def main():
         rel_path = os.path.relpath(f, os.getcwd())
         print(f"{blue}- {rel_path}{reset}")
     print("\n")
-
+    
 if __name__ == "__main__":
     main()
-
-
-# RELEASE Process (DON'T DELETE)
+   
+   # RELEASE PROCESS:
 # ----------------
 # 1. Update the version in setup.py and savecode/__init__.py.
 #
 # 2. Commit your changes.
 #
-# 3. Create a release tag with a 'v' prefix (e.g., "v1.2.3"):
-#      git tag v1.2.3
+# 3. Create a release tag with a 'v' prefix (e.g., "v*.*.*"):
+#      git tag v*.*.*
 #
 # 4. Push your tags (if your remote isn't named 'origin', use its name):
 #      git push origin --tags
@@ -87,4 +96,18 @@ if __name__ == "__main__":
 #
 # Note: Regular commits don't trigger the release workflow—only pushing a new tag does.
 
-#rebuild: python setup.py sdist bdist_wheel
+# -----------
+
+# Clear Dist: rm -rf dist/
+
+# Clear Build: rm -rf build/
+
+# Build: python -m build
+
+# Add Tag: git tag v*.*.*
+
+#Git Push Origin
+
+# Push: git push origin --tags
+
+# -----------

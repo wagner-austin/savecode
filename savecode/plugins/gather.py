@@ -1,6 +1,5 @@
 """
 savecode/plugins/gather.py - Plugin to gather Python files from directories and individual file paths.
-Version: 1.2.1
 """
 
 import os

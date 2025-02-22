@@ -1,6 +1,5 @@
 """
 savecode/utils/output_manager.py - Handles configuration of the output file path.
-Version: 1.2.1
 """
 
 import os

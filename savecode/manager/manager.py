@@ -1,6 +1,5 @@
 """
 savecode/manager/manager.py - Manager for savecode plugins. Coordinates the pipeline of tasks.
-Version: 1.2.1
 """
 
 # Global registry for plugins
