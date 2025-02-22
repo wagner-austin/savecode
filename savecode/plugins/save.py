@@ -1,26 +1,22 @@
 """
 savecode/plugins/save.py - Plugin to save code from Python files into a single output file with enhanced error handling.
+This version aggregates errors during file reading and writing instead of exiting immediately.
 """
 
 import os
-import sys
 import logging
 from typing import Any, Dict, List
 from savecode.plugin_manager.manager import register_plugin
 from savecode.utils.path_utils import relative_path
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('savecode.plugins.save')
 
 @register_plugin
 class SavePlugin:
     """
-    Plugin that reads Python files and writes their content to a designated output file with enhanced error handling.
+    Plugin that reads Python files and writes their content to a designated output file.
     
-    Fatal error:
-      - If the output file cannot be written, the process will terminate with a nonzero exit code.
-      
-    Non-fatal error:
-      - If individual files cannot be read, the error is logged and processing continues.
+    Aggregates errors encountered during reading and writing processes.
     """
     def run(self, context: Dict[str, Any]) -> None:
         """
@@ -29,6 +25,8 @@ class SavePlugin:
         Expects the following keys in context:
           - 'all_py_files': list of Python file paths gathered by the GatherPlugin.
           - 'output': the output file path where the combined code should be saved.
+        
+        Aggregates errors in context['errors'] instead of terminating immediately.
         """
         all_py_files: List[str] = context.get('all_py_files', [])
         output_file: str = context.get('output', "./temp.txt")
@@ -51,8 +49,10 @@ class SavePlugin:
                             out.write(f.read())
                             out.write("\n\n")
                     except (OSError, UnicodeDecodeError) as e:
-                        logger.error("Error reading %s: %s", file, e)
-            logger.info("Successfully wrote output file: %s", output_file)
+                        error_msg = f"Error reading {file}: {e}"
+                        logger.error(error_msg)
+                        context.setdefault('errors', []).append(error_msg)
         except OSError as e:
-            logger.error("Error writing to output file %s: %s", output_file, e)
-            sys.exit(1)  # Terminate the program if the output file cannot be written
+            error_msg = f"Error writing to output file {output_file}: {e}"
+            logger.error(error_msg)
+            context.setdefault('errors', []).append(error_msg)

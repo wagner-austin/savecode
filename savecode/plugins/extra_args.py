@@ -1,12 +1,13 @@
 """
 savecode/plugins/extra_args.py - Plugin to process and parse extra command-line arguments into key-value pairs.
+This version validates extra arguments against a list of reserved context keys to prevent key collisions.
 """
 
 import logging
 from typing import Any, Dict, List
 from savecode.plugin_manager.manager import register_plugin
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('savecode.plugins.extra_args')
 
 def parse_extra_args(extra_args: List[str]) -> Dict[str, Any]:
     """
@@ -14,16 +15,27 @@ def parse_extra_args(extra_args: List[str]) -> Dict[str, Any]:
 
     - Arguments containing '=' are split into key and value.
     - Arguments without '=' are treated as boolean flags (value True).
+    
+    Skips any keys that are reserved to avoid overwriting existing context keys.
+
+    Reserved keys: 'roots', 'files', 'skip', 'output', 'errors', 'parsed_extra_args'
 
     :param extra_args: List of extra argument strings.
     :return: Dictionary of parsed arguments with keys as strings and values as either string or bool.
     """
+    reserved_keys = {'roots', 'files', 'skip', 'output', 'errors', 'parsed_extra_args'}
     parsed: Dict[str, Any] = {}
     for arg in extra_args:
         if '=' in arg:
             key, value = arg.split('=', 1)
+            if key in reserved_keys:
+                logger.warning("Extra argument key '%s' is reserved and will be ignored.", key)
+                continue
             parsed[key] = value
         else:
+            if arg in reserved_keys:
+                logger.warning("Extra argument flag '%s' is reserved and will be ignored.", arg)
+                continue
             parsed[arg] = True
     return parsed
 

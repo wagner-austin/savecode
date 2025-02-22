@@ -1,9 +1,11 @@
 """
 savecode/cli.py - Entry point for savecode system. Aggregates plugins to gather and save Python code.
+This version aggregates errors encountered during plugin execution and reports them before exiting.
 """
 
 import argparse
 import os
+import sys
 from typing import Any, Dict, List
 from savecode import __version__
 # Import the plugins package to ensure all plugins are registered.
@@ -18,7 +20,7 @@ def main() -> None:
     """
     Main entry point for the savecode CLI.
     Parses command-line arguments, builds a shared context, runs the plugins,
-    and displays a summary of the saved files.
+    displays a summary of the saved files, and reports any errors encountered.
     """
     # Configure centralized logging
     configure_logging()
@@ -65,10 +67,18 @@ def main() -> None:
         'files': args.files,
         'skip': args.skip,
         'output': configure_output_path(args.output),
-        'extra_args': extra_args
+        'extra_args': extra_args,
+        'errors': []  # Initialize error aggregation list
     }
     
     run_plugins(context)
+    
+    # If errors were aggregated during plugin execution, report and exit with error.
+    if context['errors']:
+        print("\nErrors encountered:")
+        for error in context['errors']:
+            print(f"- {error}")
+        sys.exit(1)
     
     # Display a summary of the saved files using the centralized display function.
     display_summary(context)

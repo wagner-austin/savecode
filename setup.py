@@ -6,10 +6,14 @@ from setuptools import setup, find_packages
 from savecode import __version__
 import os
 
-# Read the contents of README.md for a long description.
+# Read the contents of README.md for a long description with graceful error handling.
 this_directory = os.path.abspath(os.path.dirname(__file__))
-with open(os.path.join(this_directory, "README.md"), encoding="utf-8") as fh:
-    long_description = fh.read()
+readme_path = os.path.join(this_directory, "README.md")
+try:
+    with open(readme_path, encoding="utf-8") as fh:
+        long_description = fh.read()
+except FileNotFoundError:
+    long_description = "Long description could not be read from README.md. Please refer to the project documentation for more details."
 
 setup(
     name='savecode',
