@@ -1,5 +1,5 @@
 """
-savecode/plugins/gather.py - Plugin to gather Python files from directories and individual file paths.
+gather.py - Plugin to gather Python files from directories and individual file paths with directory validation.
 """
 
 import os
@@ -44,10 +44,13 @@ class GatherPlugin:
         
         :param root_dir: The directory in which to search.
         :param skip_dirs: Iterable of directory names to skip.
-        :return: List of Python file paths.
+        :return: List of Python file paths. Returns an empty list if the root directory does not exist.
         """
         # Convert the provided root directory to an absolute path.
         root_dir = os.path.abspath(root_dir)
+        if not os.path.isdir(root_dir):
+            logger.warning("Directory %s does not exist. Skipping.", root_dir)
+            return []
         skip_dirs = set(skip_dirs or [])
         py_files: List[str] = []
         for dirpath, dirnames, filenames in os.walk(root_dir):
