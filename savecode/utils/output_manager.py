@@ -3,8 +3,9 @@ savecode/utils/output_manager.py - Handles configuration of the output file path
 """
 
 import os
+from typing import Any
 
-def configure_output_path(output_arg):
+def configure_output_path(output_arg: str) -> str:
     """
     Configures the output file path.
 

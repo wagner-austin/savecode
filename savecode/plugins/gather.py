@@ -4,6 +4,7 @@ savecode/plugins/gather.py - Plugin to gather Python files from directories and 
 
 import os
 import logging
+from typing import Any, Dict, List, Optional
 from savecode.manager.manager import register_plugin
 
 logger = logging.getLogger(__name__)
@@ -14,7 +15,7 @@ class GatherPlugin:
     Plugin that recursively gathers all Python (.py) files from specified directories
     and validates individual Python file paths.
     """
-    def run(self, context):
+    def run(self, context: Dict[str, Any]) -> None:
         """
         Execute the gathering process.
         
@@ -26,7 +27,7 @@ class GatherPlugin:
         Populates context with:
           - 'all_py_files': a list of gathered Python file paths.
         """
-        all_py_files = []
+        all_py_files: List[str] = []
         for root in context.get('roots', []):
             all_py_files.extend(self.gather_py_files(root, context.get('skip', [])))
         # Process individual files
@@ -37,7 +38,7 @@ class GatherPlugin:
                 logger.warning("%s is not a valid Python file.", file)
         context['all_py_files'] = all_py_files
 
-    def gather_py_files(self, root_dir, skip_dirs=None):
+    def gather_py_files(self, root_dir: str, skip_dirs: Optional[List[str]] = None) -> List[str]:
         """
         Recursively gather all .py files under the given root_dir, skipping specified directories.
         
@@ -48,7 +49,7 @@ class GatherPlugin:
         # Convert the provided root directory to an absolute path.
         root_dir = os.path.abspath(root_dir)
         skip_dirs = set(skip_dirs or [])
-        py_files = []
+        py_files: List[str] = []
         for dirpath, dirnames, filenames in os.walk(root_dir):
             # Remove directories that should be skipped so os.walk won’t traverse them.
             dirnames[:] = [d for d in dirnames if d not in skip_dirs]

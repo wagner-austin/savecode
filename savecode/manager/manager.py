@@ -2,10 +2,12 @@
 savecode/manager/manager.py - Manager for savecode plugins. Coordinates the pipeline of tasks.
 """
 
-# Global registry for plugins
-PLUGIN_REGISTRY = []
+from typing import Any, Dict, List, Type
 
-def register_plugin(cls):
+# Global registry for plugins
+PLUGIN_REGISTRY: List[Any] = []
+
+def register_plugin(cls: Type) -> Type:
     """
     Decorator to register a plugin class.
     The plugin must implement a public `run(context)` method.
@@ -16,7 +18,7 @@ def register_plugin(cls):
     PLUGIN_REGISTRY.append(cls())
     return cls
 
-def run_plugins(context):
+def run_plugins(context: Dict[str, Any]) -> None:
     """
     Run all registered plugins in sequence using the given context.
     
@@ -25,7 +27,7 @@ def run_plugins(context):
     for plugin in PLUGIN_REGISTRY:
         plugin.run(context)
 
-def list_plugins():
+def list_plugins() -> List[str]:
     """
     List the names of all registered plugins.
     

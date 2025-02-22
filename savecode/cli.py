@@ -4,6 +4,7 @@ savecode/cli.py - Entry point for savecode system. Aggregates plugins to gather 
 
 import argparse
 import os
+from typing import Any, Dict, List
 from savecode import __version__
 # Import the plugins package to ensure all plugins are registered.
 import savecode.plugins
@@ -11,7 +12,7 @@ from savecode.manager.manager import run_plugins
 from savecode.utils.output_manager import configure_output_path
 from savecode.utils.colors import GREEN, BLUE, CYAN, RESET  # Import centralized ANSI color codes
 
-def main():
+def main() -> None:
     """
     Main entry point for the savecode CLI.
     Parses command-line arguments, builds a shared context, and runs the plugins.
@@ -53,7 +54,7 @@ def main():
     args, extra_args = parser.parse_known_args()
     
     # Build a shared context for all plugins.
-    context = {
+    context: Dict[str, Any] = {
         'roots': args.roots,
         'files': args.files,
         'skip': args.skip,
@@ -64,7 +65,7 @@ def main():
     run_plugins(context)
     
     # After plugins run, display a summary.
-    all_py_files = context.get('all_py_files', [])
+    all_py_files: List[str] = context.get('all_py_files', [])
     print(f"\n{CYAN}Saved code from {len(all_py_files)} files to {context['output']}{RESET}")
     print(f"\n{GREEN}Files saved:{RESET}")
     for f in all_py_files:

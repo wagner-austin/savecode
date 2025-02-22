@@ -4,6 +4,7 @@ savecode/plugins/save.py - Plugin to save code from Python files into a single o
 
 import os
 import logging
+from typing import Any, Dict, List
 from savecode.manager.manager import register_plugin
 
 logger = logging.getLogger(__name__)
@@ -13,7 +14,7 @@ class SavePlugin:
     """
     Plugin that reads Python files and writes their content to a designated output file.
     """
-    def run(self, context):
+    def run(self, context: Dict[str, Any]) -> None:
         """
         Execute the saving process.
         
@@ -21,8 +22,8 @@ class SavePlugin:
           - 'all_py_files': list of Python file paths gathered by the GatherPlugin.
           - 'output': the output file path where the combined code should be saved.
         """
-        all_py_files = context.get('all_py_files', [])
-        output_file = context.get('output', "./temp.txt")
+        all_py_files: List[str] = context.get('all_py_files', [])
+        output_file: str = context.get('output', "./temp.txt")
         try:
             with open(output_file, 'w', encoding='utf-8') as out:
                 # Write a summary header at the beginning of the file.
