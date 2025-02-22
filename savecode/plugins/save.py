@@ -3,7 +3,10 @@ savecode/plugins/save.py - Plugin to save code from Python files into a single o
 """
 
 import os
+import logging
 from savecode.manager.manager import register_plugin
+
+logger = logging.getLogger(__name__)
 
 @register_plugin
 class SavePlugin:
@@ -38,7 +41,7 @@ class SavePlugin:
                             out.write(header)
                             out.write(f.read())
                             out.write("\n\n")
-                    except Exception as e:
-                        print(f"Error reading {file}: {e}")
-        except Exception as e:
-            print(f"Error writing to output file {output_file}: {e}")
+                    except (OSError, UnicodeDecodeError) as e:
+                        logger.error("Error reading %s: %s", file, e)
+        except OSError as e:
+            logger.error("Error writing to output file %s: %s", output_file, e)

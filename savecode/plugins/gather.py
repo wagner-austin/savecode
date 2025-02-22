@@ -3,7 +3,10 @@ savecode/plugins/gather.py - Plugin to gather Python files from directories and 
 """
 
 import os
+import logging
 from savecode.manager.manager import register_plugin
+
+logger = logging.getLogger(__name__)
 
 @register_plugin
 class GatherPlugin:
@@ -31,7 +34,7 @@ class GatherPlugin:
             if os.path.isfile(file) and file.endswith(".py"):
                 all_py_files.append(file)
             else:
-                print(f"Warning: {file} is not a valid Python file.")
+                logger.warning("%s is not a valid Python file.", file)
         context['all_py_files'] = all_py_files
 
     def gather_py_files(self, root_dir, skip_dirs=None):
