@@ -1,5 +1,5 @@
 """
-cli.py - Entry point for savecode system. Aggregates plugins to gather and save Python code.
+savecode/cli.py - Entry point for savecode system. Aggregates plugins to gather and save Python code.
 """
 
 import argparse
@@ -9,6 +9,7 @@ from savecode import __version__
 import savecode.plugins
 from savecode.manager.manager import run_plugins
 from savecode.utils.output_manager import configure_output_path
+from savecode.utils.colors import GREEN, BLUE, CYAN, RESET  # Import centralized ANSI color codes
 
 def main():
     """
@@ -64,23 +65,13 @@ def main():
     
     # After plugins run, display a summary.
     all_py_files = context.get('all_py_files', [])
-    green = "\033[1;32m"
-    blue = "\033[1;34m"
-    cyan = "\033[1;36m"
-    reset = "\033[0m"
-    print(f"\n{cyan}Saved code from {len(all_py_files)} files to {context['output']}{reset}")
-    print(f"\n{green}Files saved:{reset}")
+    print(f"\n{CYAN}Saved code from {len(all_py_files)} files to {context['output']}{RESET}")
+    print(f"\n{GREEN}Files saved:{RESET}")
     for f in all_py_files:
         # Convert each absolute file path to a relative path from the current working directory.
         rel_path = os.path.relpath(f, os.getcwd())
-        print(f"{blue}- {rel_path}{reset}")
+        print(f"{BLUE}- {rel_path}{RESET}")
     print("\n")
     
 if __name__ == "__main__":
     main()
-   
-   # RELEASE PROCESS:
-
-# update version in ~/savecode/__init__.py
-
-# bash release.sh
