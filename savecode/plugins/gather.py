@@ -1,5 +1,5 @@
 """
-gather.py - Plugin to gather Python files from directories and individual file paths with directory validation.
+savecode/plugins/gather.py - Plugin to gather Python files from directories and individual file paths with directory validation.
 """
 
 import os

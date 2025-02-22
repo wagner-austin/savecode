@@ -1,37 +1,27 @@
-Python Code Saver
+# Python Code Saver
 
-Version: 1.2.1
-
-Python Code Saver is a command-line utility that gathers Python code from specified directories and individual files, then consolidates them into one output file. This tool is especially useful for creating a single aggregated file from multiple Python scripts, for documentation, analysis, or archiving purposes.
-
+Python Code Saver is a command-line utility that gathers Python code from specified directories and individual files, then consolidates them into one output file. This tool is especially useful for creating a single aggregated file from multiple Python scripts for documentation, analysis, or archiving purposes.
 
 ---
 
-Features
+## Features
 
-Recursive File Gathering: Scans directories recursively for all .py files.
-
-Customizable Directory Skipping: Easily exclude specific subdirectories (default: rnn_src).
-
-File Filtering: Automatically skips the script itself (i.e., cli.py) to avoid self-inclusion.
-
-Flexible Input Options: Combine Python files from multiple root directories and individual file paths.
-
-Output Customization: Specify the output file location (defaults to temp.txt in the script's directory).
-
-Enhanced Output Display: After saving, the tool prints a colored list of all the files that were processed.
-
-
+- **Recursive File Gathering:** Scans directories recursively for all `.py` files.
+- **Customizable Directory Skipping:** Easily exclude specific subdirectories (default: `rnn_src`).
+- **File Filtering:** Automatically skips the script itself (i.e., `cli.py`) to avoid self-inclusion.
+- **Flexible Input Options:** Combine Python files from multiple root directories and individual file paths.
+- **Output Customization:** Specify the output file location (defaults to `temp.txt` in the script's directory).
+- **Enhanced Output Display:** After saving, the tool prints a colored list of all the files that were processed.
 
 ---
 
-Installation
+## Installation
 
-1. Clone the Repository:
+1. **Clone the Repository:**
 
-git clone https://github.com/yourusername/python-code-saver.git
-cd python-code-saver
-
+   ```bash
+   git clone https://github.com/yourusername/python-code-saver.git
+   cd python-code-saver
 
 2. Ensure Python 3 is Installed:
 
@@ -90,16 +80,13 @@ python cli.py -r ./project/src ./project/utils -o all_code.txt --skip __pycache_
 
 How It Works
 
-1. File Discovery:
-The script recursively walks through the provided root directories, collecting paths of all .py files while ignoring directories specified by the --skip option and excluding itself (cli.py).
+1. File Discovery: The script recursively walks through the provided root directories, collecting paths of all .py files while ignoring directories specified by the --skip option and excluding itself (cli.py).
 
 
-2. File Aggregation:
-Each discovered Python file is opened, and its content is read and written into the output file. A header indicating the file path is inserted before each file's content to provide clear separation.
+2. File Aggregation: Each discovered Python file is opened, and its content is read and written into the output file. A header indicating the file path is inserted before each file's content to provide clear separation.
 
 
-3. Output Confirmation:
-Once the aggregation is complete, the script prints a summary that includes the number of files processed and a list of file paths, with colored formatting for improved readability.
+3. Output Confirmation: Once the aggregation is complete, the script prints a summary that includes the number of files processed and a list of file paths, with colored formatting for improved readability.
 
 
 
@@ -131,7 +118,7 @@ Contributions are welcome! If you have suggestions or improvements, feel free to
 
 License
 
-Specify your license here. For example, MIT License.
+Open Source
 
 
 ---
@@ -140,11 +127,7 @@ Acknowledgments
 
 Inspired by the need for a simple yet effective tool to consolidate Python code for documentation and analysis.
 
-Special thanks to all contributors who helped improve the project.
-
-
 
 ---
 
 Happy coding!
-

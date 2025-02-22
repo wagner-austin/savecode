@@ -10,13 +10,19 @@ from savecode import __version__
 import savecode.plugins
 from savecode.manager.manager import run_plugins
 from savecode.utils.output_manager import configure_output_path
-from savecode.utils.colors import GREEN, BLUE, CYAN, RESET  # Import centralized ANSI color codes
+from savecode.utils.colors import GREEN, BLUE, CYAN, RESET
+from savecode.utils.logger import configure_logging  # Import centralized logging configuration
+from savecode.utils.display import display_summary     # Import display module for summary output
 
 def main() -> None:
     """
     Main entry point for the savecode CLI.
-    Parses command-line arguments, builds a shared context, and runs the plugins.
+    Parses command-line arguments, builds a shared context, runs the plugins,
+    and displays a summary of the saved files.
     """
+    # Configure centralized logging
+    configure_logging()
+    
     parser = argparse.ArgumentParser(
         description="Save the full code from Python files in specified directories and individual files to a single output file."
     )
@@ -64,15 +70,8 @@ def main() -> None:
     
     run_plugins(context)
     
-    # After plugins run, display a summary.
-    all_py_files: List[str] = context.get('all_py_files', [])
-    print(f"\n{CYAN}Saved code from {len(all_py_files)} files to {context['output']}{RESET}")
-    print(f"\n{GREEN}Files saved:{RESET}")
-    for f in all_py_files:
-        # Convert each absolute file path to a relative path from the current working directory.
-        rel_path = os.path.relpath(f, os.getcwd())
-        print(f"{BLUE}- {rel_path}{RESET}")
-    print("\n")
+    # Display a summary of the saved files using the centralized display function.
+    display_summary(context)
     
 if __name__ == "__main__":
     main()

@@ -1,5 +1,5 @@
 """
-save.py - Plugin to save code from Python files into a single output file with enhanced error handling.
+savecode/plugins/save.py - Plugin to save code from Python files into a single output file with enhanced error handling.
 """
 
 import os
