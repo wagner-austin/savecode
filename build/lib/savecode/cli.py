@@ -1,6 +1,5 @@
 """
 savecode/cli.py - Entry point for savecode system. Aggregates plugins to gather and save Python code.
-Version: 1.2.1
 """
 
 import argparse
@@ -69,8 +68,9 @@ def main():
 
 if __name__ == "__main__":
     main()
-   
-   # RELEASE PROCESS:
+
+
+# RELEASE Process (DON'T DELETE)
 # ----------------
 # 1. Update the version in setup.py and savecode/__init__.py.
 #
@@ -86,3 +86,5 @@ if __name__ == "__main__":
 #    tag pushes (tags matching "v*") to automatically build and publish your package to PyPI.
 #
 # Note: Regular commits don't trigger the release workflow—only pushing a new tag does.
+
+#rebuild: python setup.py sdist bdist_wheel

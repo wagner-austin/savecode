@@ -1,6 +1,6 @@
 Metadata-Version: 2.2
 Name: savecode
-Version: 1.2.1
+Version: 1.2.5
 Summary: Save Python code from directories and files into one output file.
 Home-page: https://github.com/wagner-austin
 Author: Austin Wagner
