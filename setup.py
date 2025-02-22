@@ -6,7 +6,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='savecode',
-    version='1.2.2',
+    version='1.2.3',
     description='Save Python code from directories and files into one output file.',
     author='Austin Wagner',
     author_email='austinwagner@msn.com',
