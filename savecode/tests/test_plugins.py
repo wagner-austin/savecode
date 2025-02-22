@@ -1,5 +1,6 @@
 """
 savecode/tests/test_plugins.py - Unit tests for plugins error handling and edge cases.
+
 Tests for GatherPlugin and SavePlugin, including non-existent directories, invalid file paths,
 and output error conditions.
 """
@@ -7,10 +8,18 @@ and output error conditions.
 import os
 import tempfile
 import unittest
-from savecode.plugin_manager.manager import run_plugins
+from savecode.plugin_manager.manager import run_plugins, clear_registry
 from savecode.plugins.save import SavePlugin
 
 class TestPlugins(unittest.TestCase):
+    def setUp(self):
+        # Reset the plugin registry before each test.
+        clear_registry()
+
+    def tearDown(self):
+        # Clear the registry after each test to ensure isolation.
+        clear_registry()
+
     def test_nonexistent_directory(self):
         """
         Verify that a non-existent directory in roots records an error and yields no gathered files.

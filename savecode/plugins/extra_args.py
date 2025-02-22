@@ -1,10 +1,14 @@
 """
 savecode/plugins/extra_args.py - Plugin to process and parse extra command-line arguments.
+
+This module defines a plugin that processes extra arguments into key-value pairs
+and stores them in the shared context.
 """
 
 import logging
 from typing import Any, Dict, List
 from savecode.plugin_manager.manager import register_plugin
+from savecode.plugin_manager.decorators import handle_plugin_errors
 from savecode.constants.reserved_keys import RESERVED_KEYS
 
 logger = logging.getLogger('savecode.plugins.extra_args')
@@ -40,6 +44,7 @@ class ExtraArgsPlugin:
     """
     Processes extra command-line arguments into a key-value dictionary and stores the result in context.
     """
+    @handle_plugin_errors
     def run(self, context: Dict[str, Any]) -> None:
         extra_args: List[str] = context.get('extra_args', [])
         if extra_args:

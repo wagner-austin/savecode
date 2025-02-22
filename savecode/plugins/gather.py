@@ -9,6 +9,7 @@ import os
 import logging
 from typing import Any, Dict, List, Optional
 from savecode.plugin_manager.manager import register_plugin
+from savecode.plugin_manager.decorators import handle_plugin_errors
 from savecode.utils.path_utils import normalize_path
 from savecode.utils.error_handler import log_and_record_error
 
@@ -18,6 +19,7 @@ logger = logging.getLogger('savecode.plugins.gather')
 class GatherPlugin:
     """Plugin for gathering Python files from directories and individual file paths."""
     
+    @handle_plugin_errors
     def run(self, context: Dict[str, Any]) -> None:
         """Execute the gathering process.
 
@@ -67,13 +69,7 @@ class GatherPlugin:
             List[str]: List of gathered Python file paths.
         """
         root_dir = normalize_path(root_dir)
-        if not os.path.isdir(root_dir):
-            error_msg = f"Directory {root_dir} does not exist. Skipping."
-            if context is not None:
-                log_and_record_error(error_msg, context, logger)
-            else:
-                logger.warning(error_msg)
-            return []
+        # Removed duplicate directory existence check since it is already performed in run().
         skip_dirs = set(skip_dirs or [])
         py_files: List[str] = []
         for dirpath, dirnames, filenames in os.walk(root_dir):

@@ -9,6 +9,7 @@ import os
 import logging
 from typing import Any, Dict, List
 from savecode.plugin_manager.manager import register_plugin
+from savecode.plugin_manager.decorators import handle_plugin_errors
 from savecode.utils.path_utils import relative_path
 from savecode.utils.error_handler import log_and_record_error
 
@@ -18,6 +19,7 @@ logger = logging.getLogger('savecode.plugins.save')
 class SavePlugin:
     """Plugin that saves the content of Python files to a single output file."""
     
+    @handle_plugin_errors
     def run(self, context: Dict[str, Any]) -> None:
         """Execute the saving process.
 

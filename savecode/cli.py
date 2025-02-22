@@ -6,21 +6,22 @@ build a shared context, execute registered plugins, display a summary of saved f
 and handle any errors encountered during execution.
 """
 
-import argparse
-import os
 import sys
-from typing import Any, Dict, List
+import logging
+from typing import Any, Dict
 from savecode import __version__
 # Import the plugins package to ensure all plugins are registered.
 import savecode.plugins
 from savecode.plugin_manager.manager import run_plugins
-from savecode.utils.output_manager import configure_output_path
+from savecode.utils.path_utils import normalize_path  # Updated import: use normalize_path directly.
 from savecode.utils.colors import GREEN, BLUE, CYAN, RESET
 from savecode.utils.display import display_summary
-from savecode.utils.logger import configure_logging  # Explicit logging configuration
+from savecode.utils.logger import configure_logging
+from savecode.utils.cli_args import parse_arguments
 
 def main() -> None:
-    """Main entry point for the savecode CLI.
+    """
+    Main entry point for the savecode CLI.
 
     Parses command-line arguments, builds a shared context, executes registered plugins,
     displays a summary of the saved files, and reports any errors encountered.
@@ -28,51 +29,19 @@ def main() -> None:
     Returns:
         None
     """
-    # Explicitly configure logging here to avoid side effects during package import.
-    configure_logging()
-    
-    parser = argparse.ArgumentParser(
-        description="Save the full code from Python files in specified directories and individual files to a single output file."
-    )
-    parser.add_argument(
-        '-r', '--roots',
-        nargs='*',
-        default=[],
-        help="One or more root directories to search for Python files."
-    )
-    parser.add_argument(
-        '-f', '--files',
-        nargs='*',
-        default=[],
-        help="One or more individual Python file paths to include."
-    )
-    parser.add_argument(
-        '-o', '--output',
-        default="./temp.txt",
-        help="Output file path. Defaults to './temp.txt'."
-    )
-    parser.add_argument(
-        '--skip',
-        nargs='*',
-        default=['rnn_src'],
-        help="Subdirectory names to skip (default: ['rnn_src'])."
-    )
-    # Add version flag.
-    parser.add_argument(
-        '-v', '--version',
-        action='version',
-        version=f"%(prog)s {__version__}",
-        help="Show program's version number and exit."
-    )
-    # Allow additional unknown arguments for future expansion.
-    args, extra_args = parser.parse_known_args()
+    args, extra_args = parse_arguments()
+
+    # Convert log level string to corresponding logging level integer.
+    log_level = getattr(logging, args.log_level.upper(), logging.WARNING)
+    # Configure logging with the dynamic log level.
+    configure_logging(level=log_level)
     
     # Build a shared context for all plugins.
     context: Dict[str, Any] = {
         'roots': args.roots,
         'files': args.files,
         'skip': args.skip,
-        'output': configure_output_path(args.output),
+        'output': normalize_path(args.output),  # Directly call normalize_path.
         'extra_args': extra_args,
         'errors': []  # Initialize error aggregation list
     }
