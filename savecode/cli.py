@@ -80,34 +80,7 @@ if __name__ == "__main__":
     main()
    
    # RELEASE PROCESS:
-# ----------------
-# 1. Update the version in setup.py and savecode/__init__.py.
-#
-# 2. Commit your changes.
-#
-# 3. Create a release tag with a 'v' prefix (e.g., "v*.*.*"):
-#      git tag v*.*.*
-#
-# 4. Push your tags (if your remote isn't named 'origin', use its name):
-#      git push origin --tags
-#
-# 5. The GitHub Actions workflow (in .github/workflows/publish.yml) is triggered by
-#    tag pushes (tags matching "v*") to automatically build and publish your package to PyPI.
-#
-# Note: Regular commits don't trigger the release workflow—only pushing a new tag does.
 
-# -----------
+# update version in ~/savecode/__init__.py
 
-# Clear Dist: rm -rf dist/
-
-# Clear Build: rm -rf build/
-
-# Build: python -m build
-
-# Add Tag: git tag v*.*.*
-
-#Git Push Origin
-
-# Push: git push origin --tags
-
-# -----------
+# bash release.sh

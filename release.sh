@@ -5,8 +5,8 @@
 
 set -e
 
-# Automatically extract the version from savecode/__init__.py
-VERSION=$(python -c "import re; f = open('savecode/__init__.py'); s = f.read(); f.close(); m = re.search('__version__\\s*=\\s*[\"\\']([^\"\\']+)[\"\\']', s); print(m.group(1) if m else '0.0.0')")
+# Automatically extract the version from savecode/__init__.py using a raw string literal for the regex
+VERSION=$(python -c "import re; f = open('savecode/__init__.py'); s = f.read(); f.close(); m = re.search(r\"__version__\s*=\s*[\\\"']([^\\\"']+)[\\\"']\", s); print(m.group(1) if m else '0.0.0')")
 echo "Using version: $VERSION"
 
 # Remove previous build artifacts
