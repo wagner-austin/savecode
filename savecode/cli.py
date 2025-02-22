@@ -1,6 +1,5 @@
 """
 savecode/cli.py - Entry point for savecode system. Aggregates plugins to gather and save Python code.
-Version: 1.2.1
 """
 
 import argparse

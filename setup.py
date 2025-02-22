@@ -1,13 +1,12 @@
 """
 setup.py - Packaging configuration for the savecode tool.
-Version: 1.2.1
 """
 
 from setuptools import setup, find_packages
 
 setup(
     name='savecode',
-    version='1.2.1',
+    version='1.2.2',
     description='Save Python code from directories and files into one output file.',
     author='Austin Wagner',
     author_email='austinwagner@msn.com',
