@@ -13,7 +13,6 @@ import savecode.plugins
 from savecode.plugin_manager.manager import run_plugins
 from savecode.utils.output_manager import configure_output_path
 from savecode.utils.colors import GREEN, BLUE, CYAN, RESET
-from savecode.utils.logger import configure_logging  # Import centralized logging configuration
 from savecode.utils.display import display_summary     # Import display module for summary output
 
 def main() -> None:
@@ -22,9 +21,6 @@ def main() -> None:
     Parses command-line arguments, builds a shared context, runs the plugins,
     displays a summary of the saved files, and reports any errors encountered.
     """
-    # Configure centralized logging
-    configure_logging()
-    
     parser = argparse.ArgumentParser(
         description="Save the full code from Python files in specified directories and individual files to a single output file."
     )

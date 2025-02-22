@@ -1,33 +1,32 @@
 """
-savecode/plugins/gather.py - Plugin to gather Python files from directories and individual file paths with directory validation.
-This version includes inline comments for non-trivial logic and improved clarity.
+savecode/plugins/gather.py - Plugin to gather Python files from directories and validate individual file paths.
 """
 
 import os
 import logging
 from typing import Any, Dict, List, Optional
 from savecode.plugin_manager.manager import register_plugin
-from savecode.utils.path_utils import normalize_path  # Using centralized path normalization
+from savecode.utils.path_utils import normalize_path
 
 logger = logging.getLogger('savecode.plugins.gather')
 
 @register_plugin
 class GatherPlugin:
     """
-    Plugin that recursively gathers all Python (.py) files from specified directories
-    and validates individual Python file paths.
+    Recursively gathers all Python (.py) files from specified directories
+    and validates individual file paths.
     """
     def run(self, context: Dict[str, Any]) -> None:
         """
         Execute the gathering process.
         
-        Expects the following keys in context:
-          - 'roots': list of root directories to search.
+        Expects in context:
+          - 'roots': list of directories to search.
           - 'skip': list of directory names to skip.
           - 'files': list of individual Python file paths.
-        
+          
         Populates context with:
-          - 'all_py_files': a deduplicated list of gathered Python file paths.
+          - 'all_py_files': deduplicated list of gathered Python file paths.
         """
         all_py_files: List[str] = []
         for root in context.get('roots', []):
@@ -38,26 +37,26 @@ class GatherPlugin:
                 context.setdefault('errors', []).append(error_msg)
             else:
                 all_py_files.extend(self.gather_py_files(normalized_root, context.get('skip', []), context))
-        # Process individual files
         for file in context.get('files', []):
-            if os.path.isfile(file) and file.endswith(".py"):
-                all_py_files.append(file)
+            normalized_file = normalize_path(file)
+            if os.path.isfile(normalized_file) and normalized_file.endswith(".py"):
+                all_py_files.append(normalized_file)
             else:
                 warning_msg = f"{file} is not a valid Python file."
                 logger.warning(warning_msg)
                 context.setdefault('errors', []).append(warning_msg)
-        # Deduplicate while preserving original order
+        # Deduplicate while preserving order
         deduped_files = list(dict.fromkeys(all_py_files))
         context['all_py_files'] = deduped_files
         logger.info("Gathered %d unique Python files.", len(deduped_files))
 
     def gather_py_files(self, root_dir: str, skip_dirs: Optional[List[str]] = None, context: Dict[str, Any] = None) -> List[str]:
         """
-        Recursively gather all .py files under the given root_dir, skipping specified directories.
+        Recursively gather all .py files under root_dir, skipping directories in skip_dirs.
         
-        :param root_dir: The directory in which to search.
-        :param skip_dirs: Iterable of directory names to skip.
-        :param context: Optional context dictionary for error aggregation.
+        :param root_dir: Directory to search.
+        :param skip_dirs: List of directory names to skip.
+        :param context: Optional context for error aggregation.
         :return: List of Python file paths.
         """
         root_dir = normalize_path(root_dir)
@@ -69,9 +68,8 @@ class GatherPlugin:
             return []
         skip_dirs = set(skip_dirs or [])
         py_files: List[str] = []
-        # Traverse the directory tree
         for dirpath, dirnames, filenames in os.walk(root_dir):
-            # Prune directories that should be skipped so os.walk doesn't traverse them
+            # Skip specified directories
             dirnames[:] = [d for d in dirnames if d not in skip_dirs]
             for fname in filenames:
                 if fname.endswith(".py"):
