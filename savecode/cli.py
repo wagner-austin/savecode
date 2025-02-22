@@ -1,6 +1,5 @@
 """
-savecode/cli.py - Entry point for the savecode CLI tool.
-
+savecode/cli.py - Entry point for the savecode CLI tool with enhanced global error handling.
 This module provides the main() function to parse command-line arguments,
 build a shared context, execute registered plugins, display a summary of saved files,
 and handle any errors encountered during execution.
@@ -59,4 +58,10 @@ def main() -> None:
     display_summary(context)
     
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as err:
+        # Log the unexpected error with a traceback and exit gracefully.
+        logger = logging.getLogger('savecode')
+        logger.exception("Unhandled exception in main: %s", err)
+        sys.exit(1)
