@@ -2,9 +2,9 @@
 savecode/utils/display.py - Module for CLI display logic to print the summary output.
 """
 
-import os
 from typing import Any, Dict, List
 from savecode.utils.colors import GREEN, BLUE, CYAN, RESET
+from savecode.utils.path_utils import relative_path
 
 def display_summary(context: Dict[str, Any]) -> None:
     """
@@ -22,7 +22,7 @@ def display_summary(context: Dict[str, Any]) -> None:
     print(f"\n{CYAN}Saved code from {len(all_py_files)} files to {output}{RESET}")
     print(f"\n{GREEN}Files saved:{RESET}")
     for file in all_py_files:
-        # Convert absolute file path to a relative path from the current working directory.
-        rel_path = os.path.relpath(file, os.getcwd())
+        # Convert absolute file path to a relative path using the utility function.
+        rel_path = relative_path(file)
         print(f"{BLUE}- {rel_path}{RESET}")
     print("\n")

@@ -1,10 +1,13 @@
 """
-savecode/manager/manager.py - Manager for savecode plugins. Coordinates the pipeline of tasks.
-This module now registers plugin classes and delays their instantiation until runtime,
+savecode/plugin_manager/manager.py - Manager for savecode plugins with enhanced error isolation.
+This module registers plugin classes and delays their instantiation until runtime,
 facilitating future enhancements such as dependency injection or configuration.
 """
 
 from typing import Any, Dict, List, Type
+import logging
+
+logger = logging.getLogger(__name__)
 
 # Global registry for plugin classes
 PLUGIN_REGISTRY: List[Type] = []
@@ -25,15 +28,16 @@ def register_plugin(cls: Type) -> Type:
 def run_plugins(context: Dict[str, Any]) -> None:
     """
     Instantiate and run all registered plugins in sequence using the given context.
-    
-    This delayed instantiation approach allows for future enhancements such as passing configuration
-    or dependencies to the plugin constructors.
+    Each plugin is executed in isolation; errors in one plugin are logged without halting the pipeline.
     
     :param context: Dictionary containing the context and shared data.
     """
     for plugin_class in PLUGIN_REGISTRY:
         plugin_instance = plugin_class()  # Delayed instantiation
-        plugin_instance.run(context)
+        try:
+            plugin_instance.run(context)
+        except Exception as e:
+            logger.error("Error running plugin %s: %s", plugin_class.__name__, e, exc_info=True)
 
 def list_plugins() -> List[str]:
     """

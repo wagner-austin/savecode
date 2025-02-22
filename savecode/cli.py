@@ -8,7 +8,7 @@ from typing import Any, Dict, List
 from savecode import __version__
 # Import the plugins package to ensure all plugins are registered.
 import savecode.plugins
-from savecode.manager.manager import run_plugins
+from savecode.plugin_manager.manager import run_plugins
 from savecode.utils.output_manager import configure_output_path
 from savecode.utils.colors import GREEN, BLUE, CYAN, RESET
 from savecode.utils.logger import configure_logging  # Import centralized logging configuration

@@ -6,7 +6,8 @@ import os
 import sys
 import logging
 from typing import Any, Dict, List
-from savecode.manager.manager import register_plugin
+from savecode.plugin_manager.manager import register_plugin
+from savecode.utils.path_utils import relative_path
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +37,7 @@ class SavePlugin:
                 # Write a summary header at the beginning of the file.
                 summary = "Files saved:\n"
                 for file in all_py_files:
-                    rel_path = os.path.relpath(file, os.getcwd())
+                    rel_path = relative_path(file)
                     summary += f"- {rel_path}\n"
                 summary += "\n\n"
                 out.write(summary)
@@ -45,12 +46,13 @@ class SavePlugin:
                 for file in all_py_files:
                     try:
                         with open(file, 'r', encoding='utf-8') as f:
-                            header = f"\nFile: {file}\n\n"
+                            header = f"\nFile: {relative_path(file)}\n\n"
                             out.write(header)
                             out.write(f.read())
                             out.write("\n\n")
                     except (OSError, UnicodeDecodeError) as e:
                         logger.error("Error reading %s: %s", file, e)
+            logger.info("Successfully wrote output file: %s", output_file)
         except OSError as e:
             logger.error("Error writing to output file %s: %s", output_file, e)
             sys.exit(1)  # Terminate the program if the output file cannot be written

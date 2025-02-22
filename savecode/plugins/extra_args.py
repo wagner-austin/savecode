@@ -1,24 +1,24 @@
 """
-savecode/utils/extra_args.py - Plugin to process and parse extra command-line arguments into key-value pairs.
+savecode/plugins/extra_args.py - Plugin to process and parse extra command-line arguments into key-value pairs.
 """
 
 import logging
 from typing import Any, Dict, List
-from savecode.manager.manager import register_plugin
+from savecode.plugin_manager.manager import register_plugin
 
 logger = logging.getLogger(__name__)
 
 def parse_extra_args(extra_args: List[str]) -> Dict[str, Any]:
     """
     Parses a list of extra command-line arguments into a dictionary.
-    
-    - Arguments with an '=' are split into key and value.
-    - Arguments without an '=' are treated as boolean flags (value True).
-    
+
+    - Arguments containing '=' are split into key and value.
+    - Arguments without '=' are treated as boolean flags (value True).
+
     :param extra_args: List of extra argument strings.
-    :return: Dictionary of parsed arguments.
+    :return: Dictionary of parsed arguments with keys as strings and values as either string or bool.
     """
-    parsed = {}
+    parsed: Dict[str, Any] = {}
     for arg in extra_args:
         if '=' in arg:
             key, value = arg.split('=', 1)
@@ -42,6 +42,6 @@ class ExtraArgsPlugin:
         extra_args: List[str] = context.get('extra_args', [])
         if extra_args:
             logger.info("Extra arguments provided: %s", extra_args)
-            parsed = parse_extra_args(extra_args)
+            parsed: Dict[str, Any] = parse_extra_args(extra_args)
             context['parsed_extra_args'] = parsed
             logger.info("Parsed extra arguments: %s", parsed)
