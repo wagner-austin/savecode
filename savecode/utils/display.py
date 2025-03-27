@@ -1,5 +1,5 @@
 """
-savecode/utils/display.py - Module for CLI display logic to print the summary output.
+savecode/utils/display.py - Module for displaying file list and summary in CLI.
 """
 
 from typing import Any, Dict, List
@@ -14,15 +14,19 @@ def display_summary(context: Dict[str, Any]) -> None:
       - 'all_py_files': list of Python file paths.
       - 'output': the output file path.
     
-    The function prints the number of files saved and a relative path for each file.
+    The function first prints the list of files (with relative paths),
+    followed by a summary line indicating the total number of files saved and the output file path.
     """
     all_py_files: List[str] = context.get('all_py_files', [])
     output = context.get('output', "./temp.txt")
     
-    print(f"\n{CYAN}Saved code from {len(all_py_files)} files to {output}{RESET}")
+    # Print the list of saved files.
     print(f"\n{GREEN}Files saved:{RESET}")
     for file in all_py_files:
-        # Convert absolute file path to a relative path using the utility function.
         rel_path = relative_path(file)
         print(f"{BLUE}- {rel_path}{RESET}")
-    print("\n")
+    
+    # Print the summary line at the bottom.
+    print(f"\n{CYAN}Saved code from {len(all_py_files)} files to {output}{RESET}\n")
+
+# End of savecode/utils/display.py
