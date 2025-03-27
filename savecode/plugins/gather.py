@@ -1,5 +1,7 @@
 """
-plugins/gather.py - Plugin to gather Python files from directories and individual file paths.
+savecode/plugins/gather.py - Plugin to gather Python files from directories and individual file paths.
+This module defines a plugin that searches specified directories and files for Python (.py) files,
+while skipping designated directories, and aggregates the list in the shared context.
 """
 
 import os
@@ -12,7 +14,7 @@ from savecode.utils.error_handler import log_and_record_error
 
 logger = logging.getLogger('savecode.plugins.gather')
 
-@register_plugin
+@register_plugin(order=20)
 class GatherPlugin:
     """Plugin for gathering Python files from directories and individual file paths."""
     
@@ -77,3 +79,5 @@ class GatherPlugin:
                     file_path = os.path.join(dirpath, fname)
                     py_files.append(file_path)
         return py_files
+
+# End of savecode/plugins/gather.py

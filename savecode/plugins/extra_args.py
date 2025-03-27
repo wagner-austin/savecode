@@ -1,6 +1,5 @@
 """
 savecode/plugins/extra_args.py - Plugin to process and parse extra command-line arguments.
-
 This module defines a plugin that processes extra arguments into key-value pairs
 and stores them in the shared context.
 """
@@ -39,7 +38,7 @@ def parse_extra_args(extra_args: List[str]) -> Dict[str, Any]:
             parsed[arg] = True
     return parsed
 
-@register_plugin
+@register_plugin(order=10)
 class ExtraArgsPlugin:
     """
     Processes extra command-line arguments into a key-value dictionary and stores the result in context.
@@ -52,3 +51,5 @@ class ExtraArgsPlugin:
             parsed: Dict[str, Any] = parse_extra_args(extra_args)
             context['parsed_extra_args'] = parsed
             logger.info("Parsed extra arguments: %s", parsed)
+
+# End of savecode/plugins/extra_args.py

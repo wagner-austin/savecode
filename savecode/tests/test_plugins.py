@@ -1,6 +1,5 @@
 """
 savecode/tests/test_plugins.py - Unit tests for plugins error handling and edge cases.
-
 Tests for GatherPlugin and SavePlugin, including non-existent directories, invalid file paths,
 and output error conditions.
 """
@@ -8,13 +7,20 @@ and output error conditions.
 import os
 import tempfile
 import unittest
+from importlib import reload
 from savecode.plugin_manager.manager import run_plugins, clear_registry
 from savecode.plugins.save import SavePlugin
 
 class TestPlugins(unittest.TestCase):
     def setUp(self):
-        # Reset the plugin registry before each test.
+        # Clear the plugin registry and reload plugins to ensure test isolation.
         clear_registry()
+        import savecode.plugins.extra_args
+        import savecode.plugins.gather
+        import savecode.plugins.save
+        reload(savecode.plugins.extra_args)
+        reload(savecode.plugins.gather)
+        reload(savecode.plugins.save)
 
     def tearDown(self):
         # Clear the registry after each test to ensure isolation.
@@ -24,17 +30,19 @@ class TestPlugins(unittest.TestCase):
         """
         Verify that a non-existent directory in roots records an error and yields no gathered files.
         """
-        context = {
-            'roots': ["/non/existent/directory"],
-            'files': [],
-            'skip': [],
-            'output': "dummy_output.txt",
-            'extra_args': [],
-            'errors': []
-        }
-        run_plugins(context)
-        self.assertTrue(len(context['errors']) > 0)
-        self.assertEqual(context.get('all_py_files', []), [])
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output_file = os.path.join(tmpdir, "output.txt")
+            context = {
+                'roots': ["/non/existent/directory"],
+                'files': [],
+                'skip': [],
+                'output': output_file,
+                'extra_args': [],
+                'errors': []
+            }
+            run_plugins(context)
+            self.assertTrue(len(context['errors']) > 0)
+            self.assertEqual(context.get('all_py_files', []), [])
     
     def test_invalid_file_in_files(self):
         """
@@ -49,19 +57,21 @@ class TestPlugins(unittest.TestCase):
             valid_file = tmp2.name
         self.addCleanup(lambda: os.path.exists(valid_file) and os.remove(valid_file))
         
-        context = {
-            'roots': [],
-            'files': [invalid_file, valid_file],
-            'skip': [],
-            'output': "dummy_output.txt",
-            'extra_args': [],
-            'errors': []
-        }
-        run_plugins(context)
-        # The valid file should be gathered; the invalid file should generate an error.
-        self.assertIn(valid_file, context.get('all_py_files', []))
-        self.assertNotIn(invalid_file, context.get('all_py_files', []))
-        self.assertTrue(any("is not a valid Python file" in error for error in context['errors']))
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output_file = os.path.join(tmpdir, "output.txt")
+            context = {
+                'roots': [],
+                'files': [invalid_file, valid_file],
+                'skip': [],
+                'output': output_file,
+                'extra_args': [],
+                'errors': []
+            }
+            run_plugins(context)
+            # The valid file should be gathered; the invalid file should generate an error.
+            self.assertIn(valid_file, context.get('all_py_files', []))
+            self.assertNotIn(invalid_file, context.get('all_py_files', []))
+            self.assertTrue(any("is not a valid Python file" in error for error in context['errors']))
     
     def test_valid_directory_gathering(self):
         """
@@ -76,11 +86,12 @@ class TestPlugins(unittest.TestCase):
             with open(non_py_file, "w", encoding="utf-8") as f:
                 f.write("Not python")
             
+            output_file = os.path.join(tmpdir, "output.txt")
             context = {
                 'roots': [tmpdir],
                 'files': [],
                 'skip': [],
-                'output': os.path.join(tmpdir, "output.txt"),
+                'output': output_file,
                 'extra_args': [],
                 'errors': []
             }
@@ -110,3 +121,5 @@ class TestPlugins(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+# End of savecode/tests/test_plugins.py

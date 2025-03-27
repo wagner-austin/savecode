@@ -1,5 +1,5 @@
 """
-savecode/plugins/save.py - Plugin to save code from Python files with streamlined file iteration.
+savecode/plugins/save.py - Plugin to save code from Python files to an output file.
 This module defines a plugin that reads Python files and writes their contents along with a summary
 to a designated output file, aggregating any errors encountered during file operations.
 """
@@ -14,7 +14,7 @@ from savecode.utils.error_handler import log_and_record_error
 
 logger = logging.getLogger('savecode.plugins.save')
 
-@register_plugin
+@register_plugin(order=30)
 class SavePlugin:
     """Plugin that saves the content of Python files to a single output file."""
     
@@ -60,3 +60,5 @@ class SavePlugin:
         except Exception as e:
             error_msg = f"Error writing to output file {output_file}: {e}"
             log_and_record_error(error_msg, context, logger, exc_info=True)
+
+# End of savecode/plugins/save.py
