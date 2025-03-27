@@ -1,10 +1,11 @@
 """
-savecode/utils/cli_args.py - Module for parsing command-line arguments.
-
-This module provides a function to parse CLI arguments and return the results.
+savecode/utils/cli_args.py - Module for parsing CLI arguments and merging source inputs.
+This module provides a function to parse CLI arguments, including an optional positional
+argument 'source' that supports running commands like 'savecode .' or 'savecode ./'.
 """
 
 import argparse
+import os
 from savecode import __version__
 
 def parse_arguments():
@@ -23,13 +24,13 @@ def parse_arguments():
         '-r', '--roots',
         nargs='*',
         default=[],
-        help="One or more root directories to search for Python files."
+        help="One or more directories or file paths to search for Python files. Accepts both directories and individual files."
     )
     parser.add_argument(
         '-f', '--files',
         nargs='*',
         default=[],
-        help="One or more individual Python file paths to include."
+        help="One or more directories or file paths to include. Accepts both directories and individual files."
     )
     parser.add_argument(
         '-o', '--output',
@@ -40,7 +41,7 @@ def parse_arguments():
         '--skip',
         nargs='*',
         default=['rnn_src'],
-        help="Subdirectory names to skip (default: ['rnn_src'])."
+        help="Subdirectory names or file paths to skip (default: ['rnn_src'])."
     )
     parser.add_argument(
         '-v', '--version',
@@ -53,5 +54,23 @@ def parse_arguments():
         default='WARNING',
         help="Set the logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL). Defaults to WARNING."
     )
+    # New optional positional argument to support commands like "savecode ." or "savecode ./"
+    parser.add_argument(
+        'source',
+        nargs='*',
+        default=[],
+        help="Optional positional argument(s) specifying directories or file paths."
+    )
     args, extra_args = parser.parse_known_args()
+
+    # Process the positional "source" arguments and merge them into roots and files.
+    for src in args.source:
+        normalized_src = os.path.normpath(os.path.abspath(src))
+        if os.path.isdir(normalized_src):
+            args.roots.append(src)
+        else:
+            args.files.append(src)
+
     return args, extra_args
+
+# End of savecode/utils/cli_args.py
