@@ -3,7 +3,7 @@ savecode/utils/display.py - Module for displaying file list and summary in CLI.
 """
 
 from typing import Any, Dict, List
-from savecode.utils.colors import GREEN, BLUE, CYAN, RESET
+from savecode.utils.colors import GREEN, BLUE, CYAN, WHITE, BG_CYAN, MAGENTA, RESET
 from savecode.utils.path_utils import relative_path
 
 def display_summary(context: Dict[str, Any]) -> None:
@@ -21,12 +21,12 @@ def display_summary(context: Dict[str, Any]) -> None:
     output = context.get('output', "./temp.txt")
     
     # Print the list of saved files.
-    print(f"\n{GREEN}Files saved:{RESET}")
+    print(f"\n{WHITE}{BG_CYAN}Files saved ({len(all_py_files)}):{RESET}")
     for file in all_py_files:
         rel_path = relative_path(file)
         print(f"{BLUE}- {rel_path}{RESET}")
     
     # Print the summary line at the bottom.
-    print(f"\n{CYAN}Saved code from {len(all_py_files)} files to {output}{RESET}\n")
+    print(f"\n{WHITE}{BG_CYAN}Saved code from {len(all_py_files)} files to {output}{RESET}\n")
 
 # End of savecode/utils/display.py
