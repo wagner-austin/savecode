@@ -18,6 +18,10 @@ def should_skip(path: str, skip_patterns: List[str]) -> bool:
     """
     Determines whether a given path (directory or file) should be skipped based on provided skip patterns.
     
+    For each skip pattern:
+      - If the pattern contains a path separator, normalize and check if it is a substring of the normalized path.
+      - Otherwise, check if the basename of the normalized pattern is present in the path's components.
+    
     Args:
         path (str): The file or directory path to check.
         skip_patterns (List[str]): List of skip patterns.
@@ -26,15 +30,14 @@ def should_skip(path: str, skip_patterns: List[str]) -> bool:
         bool: True if the path should be skipped, False otherwise.
     """
     norm_path = normalize_path(path)
-    path_components = norm_path.split(os.sep)
     for pattern in skip_patterns:
         norm_pattern = normalize_path(pattern)
-        # Check if any component of the path matches or contains the skip pattern.
-        if any(norm_pattern == comp or norm_pattern in comp for comp in path_components):
-            return True
-        # Also check if the entire normalized path ends with the normalized skip pattern.
-        if norm_path.endswith(norm_pattern):
-            return True
+        if os.sep in pattern:
+            if norm_pattern in norm_path:
+                return True
+        else:
+            if os.path.basename(norm_pattern) in norm_path.split(os.sep):
+                return True
     return False
 
 @register_plugin(order=20)
