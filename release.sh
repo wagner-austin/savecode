@@ -3,6 +3,7 @@
 # This script removes previous build artifacts, rebuilds the package,
 # and uploads the new version to PyPI using Twine.
 #update the version number in the __init__.py file and run this script to release the package to PyPI
+# use: "python -m savecode.cli -r ." for testing of changes
 
 set -e
 
