@@ -2,29 +2,44 @@
 savecode/utils/display.py - Module for displaying file list and summary in CLI.
 """
 
+import os
+from collections import defaultdict
 from typing import Any, Dict, List
 from savecode.utils.colors import GREEN, BLUE, CYAN, WHITE, BG_CYAN, MAGENTA, RESET
 from savecode.utils.path_utils import relative_path
 
 def display_summary(context: Dict[str, Any]) -> None:
     """
-    Displays a summary of the saved Python files.
+    Displays a summary of the saved Python files, grouped by directory.
     
     Expects the context to have:
       - 'all_py_files': list of Python file paths.
       - 'output': the output file path.
     
-    The function first prints the list of files (with relative paths),
-    followed by a summary line indicating the total number of files saved and the output file path.
+    The function groups files by their directory, prints a header for each group with a newline
+    separation, and then prints a summary line indicating the total number of files saved and the output file path.
     """
     all_py_files: List[str] = context.get('all_py_files', [])
     output = context.get('output', "./temp.txt")
     
-    # Print the list of saved files.
-    print(f"\n{WHITE}{BG_CYAN}Files saved ({len(all_py_files)}):{RESET}")
+    # Group files by their directory.
+    grouped_files = defaultdict(list)
     for file in all_py_files:
         rel_path = relative_path(file)
-        print(f"{BLUE}- {rel_path}{RESET}")
+        dir_name = os.path.dirname(rel_path)
+        # Use "root" as header if file is in the current directory.
+        header = dir_name if dir_name else "root"
+        grouped_files[header].append(rel_path)
+    
+    # Print the grouped files.
+    print(f"\n{WHITE}{BG_CYAN}Files saved ({len(all_py_files)}):{RESET}")
+    # Sort groups for consistent ordering.
+    for group in sorted(grouped_files.keys()):
+        # Add a newline between groups.
+        print()
+        print(f"{WHITE}{group}:{RESET}")
+        for file in grouped_files[group]:
+            print(f"{BLUE}- {file}{RESET}")
     
     # Print the summary line at the bottom.
     print(f"\n{WHITE}{BG_CYAN}Saved code from {len(all_py_files)} files to {output}{RESET}\n")
