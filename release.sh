@@ -2,7 +2,9 @@
 # release.sh - Release automation script for the savecode package.
 # This script removes previous build artifacts, rebuilds the package,
 # and uploads the new version to PyPI using Twine.
-#update the version number in the __init__.py file and run this script to release the package to PyPI
+# update the version number in the savecode/savecode/__init__.py file and run this script to release the package to PyPI
+#run using "bash release.sh"
+
 # use: "python -m savecode.cli -r ." for testing of changes
 
 set -e
@@ -24,3 +26,5 @@ echo "Uploading package to PyPI..."
 twine upload dist/*
 
 echo "Release process completed successfully."
+
+# End of release.sh
