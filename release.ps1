@@ -1,12 +1,10 @@
 <# 
 release.ps1 - Release automation script for the savecode package using PowerShell.
 This script removes previous build artifacts, rebuilds the package,
-sets environment variables for PyPI authentication, and uploads the new version to PyPI using Twine.
+requires TWINE_USERNAME and TWINE_PASSWORD environment variables for PyPI authentication,
+and uploads the new version to PyPI using Twine.
 Make sure to set the TWINE_USERNAME and TWINE_PASSWORD environment variables before running this script.
-Make a .pypirc file in your home directory with the following content:
-[pypi]
-username = __token__
-password = <your_token>
+Alternatively, create a .pypirc file in your home directory with your PyPI credentials.
 Run using: PowerShell -ExecutionPolicy Bypass -File release.ps1
 #>
 
@@ -48,15 +46,14 @@ foreach ($dir in $dirsToRemove) {
 Write-Host "Building package..."
 python -m build
 
-# Optional: Set TWINE credentials via environment variables to avoid interactive prompts.
-# Ensure you replace the token below with your current, valid API token if needed.
+# Ensure TWINE credentials are set in the environment.
 if (-not $env:TWINE_USERNAME) {
-    Write-Host "TWINE_USERNAME is not set. Setting it to __token__"
-    $env:TWINE_USERNAME = "__token__"
+    Write-Error "TWINE_USERNAME is not set. Please set it (typically to '__token__') before running this script."
+    exit 1
 }
 if (-not $env:TWINE_PASSWORD) {
-    Write-Host "TWINE_PASSWORD is not set. Setting it to the provided API token."
-    $env:TWINE_PASSWORD = "<your_token>"
+    Write-Error "TWINE_PASSWORD is not set. Please set it to your PyPI API token before running this script."
+    exit 1
 }
 
 # Upload the package to PyPI using Twine.
