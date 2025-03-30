@@ -1,12 +1,13 @@
 """
 savecode/utils/cli_args.py - Module for parsing CLI arguments and merging source inputs.
-This module provides a function to parse CLI arguments, including an optional positional
+Provides functionality to parse CLI arguments, including an optional positional
 argument 'source' that supports commands like 'savecode .' or 'savecode ./'.
 """
 
 import argparse
 import os
 from savecode import __version__
+from savecode.utils.path_utils import normalize_path
 
 def parse_arguments():
     """
@@ -65,7 +66,7 @@ def parse_arguments():
 
     # Append positional source arguments into roots/files lists.
     for src in args.source:
-        normalized_src = os.path.normpath(os.path.abspath(src))
+        normalized_src = normalize_path(src)
         if os.path.isdir(normalized_src):
             args.roots.append(src)
         else:
@@ -76,7 +77,7 @@ def parse_arguments():
         dirs = []
         files = []
         for p in paths:
-            normalized_p = os.path.normpath(os.path.abspath(p))
+            normalized_p = normalize_path(p)
             if os.path.isdir(normalized_p):
                 dirs.append(p)
             else:

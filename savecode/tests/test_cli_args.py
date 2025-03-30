@@ -1,6 +1,6 @@
 """
 savecode/tests/test_cli_args.py - Module for testing CLI argument parsing and skip functionality.
-This module tests the new positional argument handling for source inputs, merging of -r and -f arguments,
+Tests for the new positional argument handling for source inputs, merging of -r and -f arguments,
 and the robustness of --skip functionality.
 """
 
@@ -10,6 +10,7 @@ import tempfile
 import unittest
 from savecode.utils.cli_args import parse_arguments
 from savecode.plugins.gather import should_skip
+from savecode.utils.path_utils import normalize_path
 
 class TestCLIArgs(unittest.TestCase):
     def test_positional_source_directory(self):
@@ -21,8 +22,8 @@ class TestCLIArgs(unittest.TestCase):
             sys.argv = ["prog", tmpdir]
             args, extra = parse_arguments()
             # Normalize and check that the temp directory is in roots.
-            norm_roots = [os.path.normpath(os.path.abspath(x)) for x in args.roots]
-            norm_tmpdir = os.path.normpath(os.path.abspath(tmpdir))
+            norm_roots = [normalize_path(x) for x in args.roots]
+            norm_tmpdir = normalize_path(tmpdir)
             self.assertIn(norm_tmpdir, norm_roots)
             sys.argv = orig_argv
 
@@ -37,10 +38,10 @@ class TestCLIArgs(unittest.TestCase):
             orig_argv = sys.argv
             sys.argv = ["prog", "-r", file_path, "-f", tmpdir]
             args, extra = parse_arguments()
-            norm_files = [os.path.normpath(os.path.abspath(x)) for x in args.files]
-            norm_roots = [os.path.normpath(os.path.abspath(x)) for x in args.roots]
-            norm_file_path = os.path.normpath(os.path.abspath(file_path))
-            norm_tmpdir = os.path.normpath(os.path.abspath(tmpdir))
+            norm_files = [normalize_path(x) for x in args.files]
+            norm_roots = [normalize_path(x) for x in args.roots]
+            norm_file_path = normalize_path(file_path)
+            norm_tmpdir = normalize_path(tmpdir)
             self.assertIn(norm_file_path, norm_files)
             self.assertIn(norm_tmpdir, norm_roots)
             sys.argv = orig_argv
