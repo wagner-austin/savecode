@@ -41,6 +41,13 @@ class PluginManager:
         Returns:
             None
         """
+        # Auto-import built-in plugins if nobody did so yet
+        if not self.registry:
+            try:
+                import savecode.plugins  # noqa: F401  (side-effect registration)
+            except ImportError:  # pragma: no cover
+                pass
+
         sorted_plugins = sorted(self.registry, key=lambda item: item[0])
         for _, plugin_class in sorted_plugins:
             plugin_instance = plugin_class()  # Delayed instantiation.
