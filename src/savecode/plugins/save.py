@@ -6,12 +6,17 @@ to a designated output file, aggregating any errors encountered during file oper
 
 import logging
 from typing import Any, Dict, List
+from pathlib import Path
+from tqdm import tqdm
 from savecode.plugin_manager.manager import register_plugin
 from savecode.plugin_manager.decorators import handle_plugin_errors
 from savecode.utils.path_utils import relative_path
 from savecode.utils.error_handler import log_and_record_error
 
 logger = logging.getLogger("savecode.plugins.save")
+
+# Maximum file size to process (in MB)
+MAX_SIZE_MB = 5
 
 
 @register_plugin(order=30)
@@ -38,25 +43,48 @@ class SavePlugin:
         output_file: str = context.get("output", "./temp.txt")
         try:
             summary_lines = ["Files saved:"]
-            file_contents = []
-            for file in gathered:
-                rel_path = relative_path(file)
-                summary_lines.append(f"- {rel_path}")
-                try:
-                    with open(file, "r", encoding="utf-8") as f:
-                        content = f.read()
-                    header = f"\nFile: {rel_path}\n\n"
-                    file_contents.append(header + content + "\n\n")
-                except Exception as e:
-                    error_msg = f"Error reading {file}: {e}"
-                    log_and_record_error(error_msg, context, logger, exc_info=True)
 
-            # Build the complete output by combining the summary and file contents.
-            summary_text = "\n".join(summary_lines) + "\n\n"
-            complete_output = summary_text + "".join(file_contents)
-
+            # Open output file once for writing all content
             with open(output_file, "w", encoding="utf-8") as out:
-                out.write(complete_output)
+                # Write the initial summary header
+                for file in tqdm(gathered, desc="Processing files", unit="file"):
+                    rel_path = relative_path(file)
+                    summary_lines.append(f"- {rel_path}")
+
+                    # Check file size before processing
+                    if Path(file).stat().st_size > MAX_SIZE_MB * 1024 * 1024:
+                        log_and_record_error(
+                            f"Skipped {file} (>{MAX_SIZE_MB} MB)",
+                            context,
+                            logger,
+                            level="warning",
+                        )
+                        continue
+
+                    try:
+                        # Write the file header
+                        header = f"\nFile: {rel_path}\n\n"
+                        out.write(header)
+
+                        # Stream the file content in chunks
+                        with open(file, "r", encoding="utf-8", errors="replace") as f:
+                            for chunk in iter(lambda: f.read(8192), ""):  # 8 KB chunks
+                                out.write(chunk)
+
+                        # Add a separator after each file
+                        out.write("\n\n")
+                    except Exception as e:
+                        error_msg = f"Error reading {file}: {e}"
+                        log_and_record_error(error_msg, context, logger, exc_info=True)
+
+                # Write the summary at the beginning of the file
+                # Go back to the beginning of the file
+                out.seek(0)
+
+                # Write the summary
+                summary_text = "\n".join(summary_lines) + "\n\n"
+                out.write(summary_text)
+
         except Exception as e:
             error_msg = f"Error writing to output file {output_file}: {e}"
             log_and_record_error(error_msg, context, logger, exc_info=True)

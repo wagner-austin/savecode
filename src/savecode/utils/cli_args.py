@@ -46,8 +46,8 @@ def parse_arguments() -> Tuple[argparse.Namespace, List[str]]:
     parser.add_argument(
         "--skip",
         nargs="*",
-        default=["rnn_src"],
-        help="Subdirectory names or file paths to skip (default: ['rnn_src']).",
+        default=["rnn_src", "node_modules", "dist", "build", ".git"],
+        help="Subdirectory names or file paths to skip (e.g. 'rnn_src' or 'foo/bar.py')",
     )
     parser.add_argument(
         "-v",

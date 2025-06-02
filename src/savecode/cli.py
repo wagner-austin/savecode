@@ -47,7 +47,10 @@ def main() -> None:
         "errors": [],  # Initialize error aggregation list
     }
 
-    run_plugins(context)
+    try:
+        run_plugins(context)
+    except KeyboardInterrupt:
+        print("\nInterrupted by user – finishing up...")
 
     # If errors were aggregated during plugin execution, report and exit with error.
     if context["errors"]:

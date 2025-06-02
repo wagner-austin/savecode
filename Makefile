@@ -19,4 +19,4 @@ clean:
 	rm -rf dist build *.egg-info .pytest_cache
 
 run:
-	python -m savecode .
+	python -m savecode . --ext py toml ini js
