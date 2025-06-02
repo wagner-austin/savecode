@@ -103,7 +103,6 @@ def test_git_status_plugin_with_files():
         assert str(root / "file3.py") in context["all_files"]
 
 
-@pytest.mark.skip("Integration test requires actual git repository")
 def test_git_flag_integration(monkeypatch, tmp_path):
     """Integration test for the --git flag."""
     # create a fake repo with one modified file
