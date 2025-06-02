@@ -3,15 +3,15 @@ Unit tests for the GitStatusPlugin in savecode.
 """
 
 import sys
-import pytest
 import subprocess
 from pathlib import Path
+from typing import Any, Dict
 from unittest.mock import patch
 
 from savecode.plugins.git_status import _git_root, _git_changed, GitStatusPlugin
 
 
-def test_git_root_found(tmp_path):
+def test_git_root_found(tmp_path: Path) -> None:
     """Test that _git_root returns the correct path when in a git repository."""
     with patch("subprocess.check_output") as mock_output:
         mock_output.return_value = str(tmp_path) + "\n"
@@ -20,7 +20,7 @@ def test_git_root_found(tmp_path):
         mock_output.assert_called_once()
 
 
-def test_git_root_not_found(tmp_path):
+def test_git_root_not_found(tmp_path: Path) -> None:
     """Test that _git_root returns None when not in a git repository."""
     with patch("subprocess.check_output") as mock_output:
         mock_output.side_effect = subprocess.CalledProcessError(1, "git")
@@ -29,7 +29,7 @@ def test_git_root_not_found(tmp_path):
         mock_output.assert_called_once()
 
 
-def test_git_changed(tmp_path):
+def test_git_changed(tmp_path: Path) -> None:
     """Test that _git_changed returns the correct list of files."""
     mock_output = """M  staged_modified.py
  M unstaged_modified.py
@@ -56,25 +56,25 @@ def test_git_changed(tmp_path):
         assert tmp_path / "untracked.py" in result
 
 
-def test_git_status_plugin_no_flag():
+def test_git_status_plugin_no_flag() -> None:
     """Test that GitStatusPlugin does nothing when --git is not set."""
     plugin = GitStatusPlugin()
-    context = {"cli_opts": {"git": False}}
+    context: Dict[str, Any] = {"cli_opts": {"git": False}}
     plugin.run(context)
     assert "all_files" not in context
 
 
-def test_git_status_plugin_not_in_repo():
+def test_git_status_plugin_not_in_repo() -> None:
     """Test that GitStatusPlugin handles not being in a git repository gracefully."""
     with patch("savecode.plugins.git_status._git_root", return_value=None):
         plugin = GitStatusPlugin()
-        context = {"cli_opts": {"git": True}, "errors": []}
+        context: Dict[str, Any] = {"cli_opts": {"git": True}, "errors": []}
         plugin.run(context)
         assert len(context["errors"]) == 1
         assert "Not inside a Git repository" in context["errors"][0]
 
 
-def test_git_status_plugin_with_files():
+def test_git_status_plugin_with_files() -> None:
     """Test that GitStatusPlugin correctly populates all_files."""
     root = Path("/fake/repo")
     files = [
@@ -89,7 +89,7 @@ def test_git_status_plugin_with_files():
         patch("savecode.plugins.git_status.normalize_path", side_effect=lambda x: x),
     ):
         plugin = GitStatusPlugin()
-        context = {
+        context: Dict[str, Any] = {
             "cli_opts": {"git": True, "staged": False, "unstaged": False},
             "extensions": ["py", "js"],
             "errors": [],
@@ -103,7 +103,7 @@ def test_git_status_plugin_with_files():
         assert str(root / "file3.py") in context["all_files"]
 
 
-def test_git_flag_integration(monkeypatch, tmp_path):
+def test_git_flag_integration(monkeypatch: Any, tmp_path: Path) -> None:
     """Integration test for the --git flag."""
     # create a fake repo with one modified file
     js_file = tmp_path / "file.js"
