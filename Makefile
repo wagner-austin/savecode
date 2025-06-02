@@ -16,7 +16,10 @@ build:
 	python -m build
 
 clean:
-	rm -rf dist build *.egg-info .pytest_cache
+	powershell -Command "if (Test-Path dist) { Remove-Item -Recurse -Force dist }"
+	powershell -Command "if (Test-Path build) { Remove-Item -Recurse -Force build }"
+	powershell -Command "Remove-Item -Recurse -Force -ErrorAction SilentlyContinue *.egg-info"
+	powershell -Command "if (Test-Path .pytest_cache) { Remove-Item -Recurse -Force .pytest_cache }"
 
 run:
 	python -m savecode . --ext py toml ini js
