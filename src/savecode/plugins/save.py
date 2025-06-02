@@ -44,7 +44,7 @@ class SavePlugin:
         output_file: str = context.get("output", "./temp.txt")
         try:
             summary_lines = ["Files saved:"]
-            
+
             # Open output file for both reading and writing
             with open(output_file, "w+", encoding="utf-8") as out:
                 # Write the initial summary header
@@ -87,7 +87,7 @@ class SavePlugin:
                 summary_lines[0] = f"Files saved ({file_count}):"
                 summary_text = "\n".join(summary_lines) + "\n\n"
                 out.write(summary_text)
-                
+
                 # Go to the end of the file to add a footer
                 out.seek(0, 2)  # Seek to the end of the file
                 footer = f"\nSaved code from {file_count} files to {output_file}\n"
