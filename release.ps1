@@ -11,25 +11,21 @@ Run using: PowerShell -ExecutionPolicy Bypass -File release.ps1
 # Exit on any error.
 $ErrorActionPreference = "Stop"
 
-# Function to extract the version from savecode/__init__.py using regex.
+# Function to extract the version from pyproject.toml using regex.
 function Get-Version {
-    $initFile = "savecode/__init__.py"
-    if (-Not (Test-Path $initFile)) {
-        Write-Host "Error: $initFile not found."
-        exit 1
+    $pyproject = "pyproject.toml"
+    if (-Not (Test-Path $pyproject)) {
+        Write-Host "Error: $pyproject not found." ; exit 1
     }
-    $content = Get-Content $initFile -Raw
-    $versionRegex = '__version__\s*=\s*["'']([^"'']+)["'']'
-    if ($content -match $versionRegex) {
+    $content = Get-Content $pyproject -Raw
+    if ($content -match '^\s*version\s*=\s*["'']([^"'']+)["'']'m) {
         return $Matches[1]
     }
-    else {
-        return "0.0.0"
-    }
+    Write-Host "Could not find version in pyproject.toml." ; exit 1
 }
 
 # Function to load TWINE credentials from the .pypirc file.
-function Load-PyPiCredentials {
+function Get-PyPiCredentials {
     $pypircPath = Join-Path $env:USERPROFILE ".pypirc"
     if (Test-Path $pypircPath) {
         Write-Host "Loading PyPI credentials from $pypircPath..."
@@ -84,7 +80,7 @@ python -m build
 
 # Attempt to load credentials from .pypirc if environment variables are not set.
 if (-not $env:TWINE_USERNAME -or -not $env:TWINE_PASSWORD) {
-    Load-PyPiCredentials
+    Get-PyPiCredentials
 }
 
 # Ensure TWINE credentials are set in the environment.

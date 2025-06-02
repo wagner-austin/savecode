@@ -1,0 +1,14 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "savecode"
+version = "2.0.2"
+description = "Save Python (and other) code from directories and files into one output file."
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [{ name = "Austin Wagner", email = "austinwagner@msn.com" }]
+
+[project.scripts]
+savecode = "savecode.cli:main"
