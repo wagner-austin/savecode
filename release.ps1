@@ -18,7 +18,7 @@ function Get-Version {
         Write-Host "Error: $pyproject not found." ; exit 1
     }
     $content = Get-Content $pyproject -Raw
-    if ($content -match '^\s*version\s*=\s*["'']([^"'']+)["'']'m) {
+    if ($content -match '(?m)^\s*version\s*=\s*["'']([^"'']+)["'']') {
         return $Matches[1]
     }
     Write-Host "Could not find version in pyproject.toml." ; exit 1

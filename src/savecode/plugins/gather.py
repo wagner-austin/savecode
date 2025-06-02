@@ -125,7 +125,17 @@ class GatherPlugin:
 
     @staticmethod
     def _matches(path: str, exts: List[str]) -> bool:
-        return any(path.lower().endswith(f".{ext}") for ext in exts)
+        """Check if a file path has an extension matching any in the provided list.
+        
+        Args:
+            path: The file path to check
+            exts: List of extensions (without dots)
+            
+        Returns:
+            True if the file has a matching extension
+        """
+        file_ext = Path(path).suffix.lstrip(".").lower()
+        return file_ext in exts
 
 
 # End of savecode/plugins/gather.py
