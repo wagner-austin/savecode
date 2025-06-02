@@ -14,7 +14,6 @@ from savecode.plugin_manager.manager import run_plugins
 from savecode.utils.path_utils import (
     normalize_path,
 )  # Updated import: use normalize_path directly.
-import savecode.plugins  # Ensure plugins are registered
 from savecode.utils.display import display_summary
 from savecode.utils.logger import configure_logging
 from savecode.utils.cli_args import parse_arguments

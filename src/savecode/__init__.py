@@ -10,4 +10,5 @@ try:
 except PackageNotFoundError:
     __version__ = "0.0.0.dev"
 
+__all__ = ["run_plugins", "list_plugins"]
 from .plugin_manager import run_plugins, list_plugins
