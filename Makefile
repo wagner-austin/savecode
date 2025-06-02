@@ -31,7 +31,7 @@ endef
 # Targets
 # --------------------------------------------------------------------
 help:              ## Show this help
-	@awk 'BEGIN{FS=":?## "}; /^[a-zA-Z_\-]+:.*?## /{printf "\033[36m%-16s\033[0m %s\n",$$1,$$2}' $(MAKEFILE_LIST)
+	@powershell -Command "Get-Content Makefile | ForEach-Object { if ($$_ -match '^([a-zA-Z_-]+):.*?## (.*)$$') { Write-Host -ForegroundColor Cyan ('{0,-16}' -f $$Matches[1]) -NoNewline; Write-Host $$Matches[2] } }"
 
 venv:              ## Create / refresh local virtual-env
 	$(PYTHON) -m venv $(ENV_DIR)
@@ -43,7 +43,7 @@ install: venv      ## Install this package in editable mode + dev deps
 test:              ## Run the test-suite
 	$(PYTHON) -m pytest
 
-lint:              ## Ruff → Black → MyPy (stop on first failure)
+lint:              ## Ruff -> Black -> MyPy (stop on first failure)
 	ruff check --fix
 	ruff format
 	black .
