@@ -7,10 +7,13 @@ Python Code Saver is a command-line utility that gathers Python code from specif
 ## Features
 
 - **Recursive File Gathering:** Scans directories recursively for all `.py` files.
-- **Customizable Directory Skipping:** Easily exclude specific subdirectories (default: `rnn_src`).
-- **File Filtering:** Automatically skips the script itself (i.e., `cli.py`) to avoid self-inclusion.
-- **Flexible Input Options:** Combine Python files from multiple root directories and individual file paths.
+- **Customizable Directory Skipping:** Easily exclude specific subdirectories (default: `node_modules`, `dist`, `build`, `.git`).
+- **Git Integration:** Collect only files tracked by Git with options for staged or unstaged changes.
+- **File Filtering:** Automatically skips the script itself to avoid self-inclusion.
+- **Flexible Input Options:** Combine files from multiple root directories and individual file paths.
+- **Multiple File Types:** Support for various file extensions beyond Python (e.g., js, toml, html, css).
 - **Output Customization:** Specify the output file location (defaults to `temp.txt` in the script's directory).
+- **Progress Indicator:** Shows a progress bar during file processing for better visibility.
 - **Enhanced Output Display:** After saving, the tool prints a colored list of all the files that were processed.
 
 ---
@@ -42,38 +45,119 @@ Run the script from the command line using Python. Below are the available optio
 
 python cli.py [OPTIONS]
 
-Options
+### Options
 
--r or --roots
+**-r or --roots**
 
-Specify one or more root directories to search for Python files.
+Specify one or more root directories to search for files.
 
-python cli.py -r ./src ./lib
+```bash
+python -m savecode -r ./src ./lib
+```
 
--f or --files
+**-f or --files**
 
-Provide one or more individual Python file paths to include.
+Provide one or more individual file paths to include.
 
-python cli.py -f script1.py script2.py
+```bash
+python -m savecode -f script1.py script2.py
+```
 
--o or --output
+**-o or --output**
 
-Define the output file path. If not provided, defaults to temp.txt in the same directory as cli.py.
+Define the output file path. If not provided, defaults to temp.txt in the current directory.
 
-python cli.py -o combined_output.txt
+```bash
+python -m savecode -o combined_output.txt
+```
 
---skip
+**--skip**
 
-List subdirectory names to skip during the search (default: rnn_src).
+List subdirectory names to skip during the search (default: `node_modules`, `dist`, `build`, `.git`).
 
-python cli.py --skip tests docs
+```bash
+python -m savecode --skip tests docs
+```
+
+**--ext or --extensions**
+
+Specify file extensions to collect (without leading period). If not provided, defaults to 'py'.
+
+```bash
+python -m savecode --ext py js html css
+```
+
+**--git**
+
+Collect files listed by Git status instead of walking the filesystem.
+
+```bash
+python -m savecode --git
+```
+
+**--staged**
+
+With --git: only include staged changes.
+
+```bash
+python -m savecode --git --staged
+```
+
+**--unstaged**
+
+With --git: only include unstaged changes.
+
+```bash
+python -m savecode --git --unstaged
+```
 
 
-Example Command
+### Example Commands
 
-Combine Python files from two directories, exclude certain subdirectories, and specify an output file:
+**Basic Usage:**
 
-python cli.py -r ./project/src ./project/utils -o all_code.txt --skip __pycache__ migrations
+Combine files from the current directory with specific extensions:
+
+```bash
+python -m savecode --ext py js html css
+```
+
+**Multiple Directories:**
+
+Combine files from multiple directories, exclude certain subdirectories, and specify an output file:
+
+```bash
+python -m savecode -r ./project/src ./project/utils -o all_code.txt --skip __pycache__ migrations
+```
+
+**Git Integration:**
+
+Collect only files tracked by Git with changes (staged or unstaged):
+
+```bash
+python -m savecode --git
+```
+
+Collect only files with staged changes in Git:
+
+```bash
+python -m savecode --git --staged
+```
+
+**Using the Makefile:**
+
+The included Makefile provides convenient shortcuts:
+
+```bash
+# Run on current directory with default extensions
+make run
+
+# Run with Git integration
+make git
+
+# Run with custom arguments
+make run ARGS="--ext js html css"
+```
 
 
 ---

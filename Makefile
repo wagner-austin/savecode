@@ -3,7 +3,7 @@
 # Example:    make run ARGS="--git --ext js"
 # --------------------------------------------------------------------
 
-.PHONY: help venv install test lint build clean run git-run
+.PHONY: help venv install test lint build clean run git
 
 # --------------------------------------------------------------------
 # Configurable knobs (override on the CLI or define in an .env file)
@@ -12,17 +12,6 @@ PYTHON ?= python
 ENV_DIR ?= .venv
 EXTS   ?= py toml ini js
 RUN_DIR ?= .
-
-# Command that removes paths cross-platform
-define rmdir
-	$(PYTHON) - <<PY
-import shutil, sys, pathlib, os
-for p in sys.argv[1:]:
-    path = pathlib.Path(p)
-    if path.exists():
-        shutil.rmtree(path, ignore_errors=True)
-PY
-endef
 
 # Default goal -------------------------------------------------------
 .DEFAULT_GOAL := help
@@ -53,11 +42,13 @@ build:             ## Build sdist + wheel
 	$(PYTHON) -m build
 
 clean:             ## Remove build artefacts
-	@$(call rmdir,dist build .pytest_cache)
-	@$(call rmdir,$(shell ls -d *.egg-info 2>/dev/null || true))
+	powershell -Command "if (Test-Path dist) { Remove-Item -Recurse -Force dist }"
+	powershell -Command "if (Test-Path build) { Remove-Item -Recurse -Force build }"
+	powershell -Command "Remove-Item -Recurse -Force -ErrorAction SilentlyContinue *.egg-info"
+	powershell -Command "if (Test-Path .pytest_cache) { Remove-Item -Recurse -Force .pytest_cache }"
 
 run:               ## Run savecode on $(RUN_DIR) with $(EXTS)
 	$(PYTHON) -m savecode $(RUN_DIR) --ext $(EXTS) $(ARGS)
 
-git-run:           ## Same, but gather only files reported by git status
-	$(PYTHON) -m savecode $(RUN_DIR) --git --ext $(EXTS) $(ARGS)
+git:           ## Gather files reported by git status
+	$(PYTHON) -m savecode $(RUN_DIR) --git
