@@ -65,6 +65,10 @@ class GatherPlugin:
         Returns:
             None
         """
+        # Skip if all_files is already populated by another plugin (e.g. GitStatusPlugin)
+        if context.get("all_files") is not None:
+            return
+
         gathered_files: List[str] = []
         # Combine roots and files into a single list.
         entries = context.get("roots", []) + context.get("files", [])

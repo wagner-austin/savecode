@@ -72,6 +72,21 @@ def parse_arguments() -> Tuple[argparse.Namespace, List[str]]:
             "If not provided, defaults to ['py']."
         ),
     )
+    parser.add_argument(
+        "--git",
+        action="store_true",
+        help="Collect files listed by `git status --porcelain` instead of walking the filesystem.",
+    )
+    parser.add_argument(
+        "--staged",
+        action="store_true",
+        help="With --git: only include staged changes.",
+    )
+    parser.add_argument(
+        "--unstaged",
+        action="store_true",
+        help="With --git: only include unstaged changes.",
+    )
     # New optional positional argument to support commands like "savecode ." or "savecode ./"
     parser.add_argument(
         "source",

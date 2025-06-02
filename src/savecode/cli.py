@@ -45,6 +45,11 @@ def main() -> None:
         "extensions": [ext.lower().lstrip(".") for ext in args.ext],
         "extra_args": extra_args,
         "errors": [],  # Initialize error aggregation list
+        "cli_opts": {  # NEW: pass raw flags so plugins can see them
+            "git": args.git,
+            "staged": args.staged,
+            "unstaged": args.unstaged,
+        },
     }
 
     try:
