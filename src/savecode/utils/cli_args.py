@@ -87,6 +87,11 @@ def parse_arguments() -> Tuple[argparse.Namespace, List[str]]:
         action="store_true",
         help="With --git: only include unstaged changes.",
     )
+    parser.add_argument(
+        "--all-ext",
+        action="store_true",
+        help="When used with --git, include every file Git reports, ignoring --ext.",
+    )
     # New optional positional argument to support commands like "savecode ." or "savecode ./"
     parser.add_argument(
         "source",

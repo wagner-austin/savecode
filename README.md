@@ -111,6 +111,14 @@ With --git: only include unstaged changes.
 python -m savecode --git --unstaged
 ```
 
+**--all-ext**
+
+When used with --git, include every file Git reports, ignoring --ext.
+
+```bash
+python -m savecode --git --all-ext
+```
+
 
 ### Example Commands
 
@@ -121,6 +129,9 @@ Combine files from the current directory with specific extensions:
 ```bash
 python -m savecode --ext py js html css
 ```
+
+> Every run automatically places the combined output on your clipboard.
+> Set environment variable `SAVECODE_NOCOPY=1` if you prefer to disable this.
 
 **Multiple Directories:**
 
@@ -152,18 +163,19 @@ The included Makefile provides convenient shortcuts:
 # Run on current directory with default extensions
 make run
 
-# Run with Git integration (all changed files)
-make git
-
-# Run with Git integration (only staged files)
-make git-staged
-
-# Run with Git integration (only unstaged files)
-make git-unstaged
-
 # Run with custom arguments
 make run ARGS="--ext js html css"
 ```
+
+### Snapshot just what Git says has changed
+
+```bash
+make git            # staged + unstaged + untracked, every file type
+make git-staged     # staged only
+make git-unstaged   # unstaged + untracked
+```
+
+Use ARGS="--ext py js" if you want to re-enable filtering.
 
 
 ---

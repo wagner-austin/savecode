@@ -49,6 +49,7 @@ def main() -> None:
             "git": args.git,
             "staged": args.staged,
             "unstaged": args.unstaged,
+            "all_ext": args.all_ext,
         },
     }
 

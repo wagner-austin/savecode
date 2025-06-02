@@ -22,7 +22,8 @@ classifiers = [
 ]
 keywords = ["code", "backup", "source code", "extraction", "utility"]
 dependencies = [
-    "tqdm>=4.65.0"
+    "tqdm>=4.65.0",
+    "pyperclip>=1.8"
 ]
 
 [project.urls]

@@ -91,14 +91,18 @@ class GitStatusPlugin:
             staged = unstaged = True
 
         files = _git_changed(repo_root, staged, unstaged)
-        # normalise and filter by extension
+        # normalize paths from git output
+        normalized = [normalize_path(str(p)) for p in files]
+
+        # apply extension filtering only if all_ext is not set
+        cli_opts = context["cli_opts"]
         exts = context["extensions"]
-        normalized = [
-            normalize_path(str(p))
-            for p in files
-            if p.suffix.lstrip(".").lower() in exts
-        ]
-        context["all_files"] = list(
-            dict.fromkeys(normalized)
-        )  # dedupe while keeping order
-        logger.info("GitStatusPlugin gathered %d files", len(normalized))
+        allowed = (
+            normalized
+            if cli_opts.get("all_ext")
+            else [p for p in normalized if Path(p).suffix.lstrip(".").lower() in exts]
+        )
+
+        # dedupe while keeping order
+        context["all_files"] = list(dict.fromkeys(allowed))
+        logger.info("GitStatusPlugin gathered %d files", len(context["all_files"]))

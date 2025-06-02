@@ -78,6 +78,24 @@ class TestCLIArgs(unittest.TestCase):
         self.assertTrue(should_skip(sample_path, ["tests/filename.py"]))
         self.assertFalse(should_skip(sample_path, ["nonsense"]))
 
+    def test_all_ext_flag(self) -> None:
+        """
+        Test that the --all-ext flag is correctly parsed and defaults to False.
+        """
+        # Test default value (should be False)
+        orig_argv = sys.argv
+        sys.argv = ["prog", "--git"]
+        args, _ = parse_arguments()
+        self.assertFalse(args.all_ext)
+
+        # Test explicit setting to True
+        sys.argv = ["prog", "--git", "--all-ext"]
+        args, _ = parse_arguments()
+        self.assertTrue(args.all_ext)
+
+        # Restore original argv
+        sys.argv = orig_argv
+
 
 if __name__ == "__main__":
     unittest.main()

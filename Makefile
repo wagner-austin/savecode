@@ -3,14 +3,14 @@
 # Example:    make run ARGS="--git --ext js"
 # --------------------------------------------------------------------
 
-.PHONY: help venv install test lint build clean run git git-staged git-unstaged
+.PHONY: help venv install test lint build clean run git git-staged git-unstaged release
 
 # --------------------------------------------------------------------
 # Configurable knobs (override on the CLI or define in an .env file)
 # --------------------------------------------------------------------
 PYTHON ?= python
 ENV_DIR ?= .venv
-EXTS   ?= py toml ini js
+EXTS   ?= py toml ini sh ps1 html css js ini
 RUN_DIR ?= .
 
 # Default goal -------------------------------------------------------
@@ -20,7 +20,7 @@ RUN_DIR ?= .
 # Targets
 # --------------------------------------------------------------------
 help:              ## Show this help
-	@powershell -Command "Get-Content Makefile | ForEach-Object { if ($$_ -match '^([a-zA-Z_-]+):.*?## (.*)$$') { Write-Host -ForegroundColor Cyan ('{0,-16}' -f $$Matches[1]) -NoNewline; Write-Host $$Matches[2] } }"
+	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-16s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
 venv:              ## Create / refresh local virtual-env
 	$(PYTHON) -m venv $(ENV_DIR)
@@ -41,20 +41,28 @@ lint:              ## Ruff -> Black -> MyPy (stop on first failure)
 build:             ## Build sdist + wheel
 	$(PYTHON) -m build
 
+# Python rm -rf macro for cross-platform directory removal
+define rmdir
+$(PYTHON) -c "import shutil, os, glob; [shutil.rmtree(d, ignore_errors=True) for d in glob.glob('$(1)') if os.path.isdir(d)]"
+endef
+
 clean:             ## Remove build artefacts
-	powershell -Command "if (Test-Path dist) { Remove-Item -Recurse -Force dist }"
-	powershell -Command "if (Test-Path build) { Remove-Item -Recurse -Force build }"
-	powershell -Command "Remove-Item -Recurse -Force -ErrorAction SilentlyContinue *.egg-info"
-	powershell -Command "if (Test-Path .pytest_cache) { Remove-Item -Recurse -Force .pytest_cache }"
+	$(call rmdir,dist)
+	$(call rmdir,build)
+	$(call rmdir,*.egg-info)
+	$(call rmdir,.pytest_cache)
 
 run:               ## Run savecode on $(RUN_DIR) with $(EXTS)
 	$(PYTHON) -m savecode $(RUN_DIR) --ext $(EXTS) $(ARGS)
 
-git:           ## Gather files reported by git status
-	$(PYTHON) -m savecode $(RUN_DIR) --git
+git:               ## Gather all modified/untracked files
+	$(PYTHON) -m savecode $(RUN_DIR) --git --all-ext $(ARGS)
 
 git-staged:        ## Gather only files that are *staged* for commit
-	$(PYTHON) -m savecode $(RUN_DIR) --git --staged --ext $(EXTS) $(ARGS)
+	$(PYTHON) -m savecode $(RUN_DIR) --git --staged --all-ext $(ARGS)
 
 git-unstaged:      ## Gather only *unstaged* or untracked files
-	$(PYTHON) -m savecode $(RUN_DIR) --git --unstaged --ext $(EXTS) $(ARGS)
+	$(PYTHON) -m savecode $(RUN_DIR) --git --unstaged --all-ext $(ARGS)
+
+release: build    ## Build and upload to PyPI via Twine
+	$(PYTHON) -m twine upload dist/*
