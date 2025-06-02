@@ -6,6 +6,7 @@ while skipping those that match provided skip patterns.
 
 import os
 import logging
+from pathlib import Path
 from typing import Any, Dict, List
 from savecode.plugin_manager.manager import register_plugin
 from savecode.plugin_manager.decorators import handle_plugin_errors
@@ -126,11 +127,11 @@ class GatherPlugin:
     @staticmethod
     def _matches(path: str, exts: List[str]) -> bool:
         """Check if a file path has an extension matching any in the provided list.
-        
+
         Args:
             path: The file path to check
             exts: List of extensions (without dots)
-            
+
         Returns:
             True if the file has a matching extension
         """
