@@ -6,11 +6,12 @@ argument 'source' that supports commands like 'savecode .' or 'savecode ./'.
 
 import argparse
 import os
+from typing import List, Tuple
 from savecode import __version__
 from savecode.utils.path_utils import normalize_path
 
 
-def parse_arguments():
+def parse_arguments() -> Tuple[argparse.Namespace, List[str]]:
     """
     Parse command-line arguments for the savecode tool.
 
@@ -93,9 +94,9 @@ def parse_arguments():
             args.files.append(src)
 
     # Reclassify the provided roots and files based on actual type.
-    def reclassify(paths):
-        dirs = []
-        files = []
+    def reclassify(paths: List[str]) -> Tuple[List[str], List[str]]:
+        dirs: List[str] = []
+        files: List[str] = []
         for p in paths:
             normalized_p = normalize_path(p)
             if os.path.isdir(normalized_p):

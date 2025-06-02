@@ -13,7 +13,7 @@ from savecode.plugins.save import SavePlugin
 
 
 class TestPlugins(unittest.TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         # Clear the plugin registry and reload plugins to ensure test isolation.
         clear_registry()
         import savecode.plugins.extra_args
@@ -25,11 +25,11 @@ class TestPlugins(unittest.TestCase):
         reload(savecode.plugins.gather)
         reload(savecode.plugins.save)
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         # Clear the registry after each test to ensure isolation.
         clear_registry()
 
-    def test_nonexistent_directory(self):
+    def test_nonexistent_directory(self) -> None:
         """
         Verify that a non-existent directory in roots records an error and yields no gathered files.
         """
@@ -48,7 +48,7 @@ class TestPlugins(unittest.TestCase):
             self.assertTrue(len(context["errors"]) > 0)
             self.assertEqual(context.get("all_files", []), [])
 
-    def test_invalid_file_in_files(self):
+    def test_invalid_file_in_files(self) -> None:
         """
         Verify that an invalid file in the 'files' list is logged as an error and not gathered.
         """
@@ -56,12 +56,14 @@ class TestPlugins(unittest.TestCase):
         with tempfile.NamedTemporaryFile(suffix=".txt", delete=False) as tmp:
             invalid_file = tmp.name
         self.addCleanup(
-            lambda: os.path.exists(invalid_file) and os.remove(invalid_file)
+            lambda: os.remove(invalid_file) if os.path.exists(invalid_file) else None
         )
 
         with tempfile.NamedTemporaryFile(suffix=".py", delete=False) as tmp2:
             valid_file = tmp2.name
-        self.addCleanup(lambda: os.path.exists(valid_file) and os.remove(valid_file))
+        self.addCleanup(
+            lambda: os.remove(valid_file) if os.path.exists(valid_file) else None
+        )
 
         with tempfile.TemporaryDirectory() as tmpdir:
             output_file = os.path.join(tmpdir, "output.txt")
@@ -84,7 +86,7 @@ class TestPlugins(unittest.TestCase):
                 )
             )
 
-    def test_valid_directory_gathering(self):
+    def test_valid_directory_gathering(self) -> None:
         """
         Verify that a directory containing a Python file is correctly processed,
         and non-Python files are ignored without errors.
@@ -112,7 +114,7 @@ class TestPlugins(unittest.TestCase):
             # No error should be recorded for the non-Python file.
             self.assertFalse(any("readme.txt" in error for error in context["errors"]))
 
-    def test_saveplugin_output_error(self):
+    def test_saveplugin_output_error(self) -> None:
         """
         Verify that SavePlugin records an error when the output file cannot be written to.
         """
@@ -137,7 +139,7 @@ class TestPlugins(unittest.TestCase):
                 )
             )
 
-    def test_gather_toml_files(self):
+    def test_gather_toml_files(self) -> None:
         """
         Verify that a TOML file is correctly gathered when the toml extension is specified.
         """

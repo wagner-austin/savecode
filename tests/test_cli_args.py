@@ -14,7 +14,7 @@ from savecode.utils.path_utils import normalize_path
 
 
 class TestCLIArgs(unittest.TestCase):
-    def test_only_toml_when_specified(self):
+    def test_only_toml_when_specified(self) -> None:
         """
         Ensure that specifying --ext toml results in args.ext == ["toml"]
         """
@@ -24,7 +24,7 @@ class TestCLIArgs(unittest.TestCase):
         self.assertEqual(args.ext, ["toml"])
         sys.argv = orig_argv
 
-    def test_positional_source_directory(self):
+    def test_positional_source_directory(self) -> None:
         """
         Test that a positional source directory is correctly added to roots.
         """
@@ -38,7 +38,7 @@ class TestCLIArgs(unittest.TestCase):
             self.assertIn(norm_tmpdir, norm_roots)
             sys.argv = orig_argv
 
-    def test_mixed_roots_and_files(self):
+    def test_mixed_roots_and_files(self) -> None:
         """
         Test that -r and -f options correctly process directories and file paths interchangeably.
         """
@@ -57,7 +57,7 @@ class TestCLIArgs(unittest.TestCase):
             self.assertIn(norm_tmpdir, norm_roots)
             sys.argv = orig_argv
 
-    def test_skip_patterns_parsing(self):
+    def test_skip_patterns_parsing(self) -> None:
         """
         Test that --skip arguments are parsed correctly.
         """
@@ -67,7 +67,7 @@ class TestCLIArgs(unittest.TestCase):
         self.assertEqual(args.skip, ["tests", "/tests/", "tests/filename.py"])
         sys.argv = orig_argv
 
-    def test_should_skip_function(self):
+    def test_should_skip_function(self) -> None:
         """
         Test the should_skip helper function with various skip patterns.
         """

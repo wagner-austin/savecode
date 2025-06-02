@@ -4,8 +4,11 @@ savecode/plugin_manager/manager.py - Plugin Manager for savecode.
 Encapsulates plugin registration, execution, and management of plugin ordering and isolation.
 """
 
-from typing import Any, Dict, List, Tuple, Type, Callable
 import logging
+from typing import Any, Dict, List, Tuple, Type, Callable, TypeVar
+
+# Define a TypeVar for plugins
+T = TypeVar("T")
 
 logger = logging.getLogger(__name__)
 
@@ -13,18 +16,18 @@ logger = logging.getLogger(__name__)
 class PluginManager:
     """Encapsulates the registry and execution of plugins."""
 
-    def __init__(self):
-        self.registry: List[Tuple[int, Type]] = []
+    def __init__(self) -> None:
+        self.registry: List[Tuple[int, Type[Any]]] = []
 
-    def register_plugin(self, plugin_class: Type, order: int = 100) -> Type:
+    def register_plugin(self, plugin_class: Type[T], order: int = 100) -> Type[T]:
         """Register a plugin class with an optional execution order.
 
         Args:
-            plugin_class (Type): The plugin class to register.
+            plugin_class (Type[T]): The plugin class to register.
             order (int, optional): The execution order; lower values run earlier. Defaults to 100.
 
         Returns:
-            Type: The registered plugin class.
+            Type[T]: The registered plugin class.
         """
         self.registry.append((order, plugin_class))
         return plugin_class
@@ -73,7 +76,7 @@ class PluginManager:
 plugin_manager = PluginManager()
 
 
-def register_plugin(*args, order: int = 100) -> Callable:
+def register_plugin(*args: Any, order: int = 100) -> Callable[[Type[T]], Type[T]]:
     """Decorator to register a plugin class with an optional execution order.
 
     Can be used as:
@@ -89,13 +92,13 @@ def register_plugin(*args, order: int = 100) -> Callable:
         order (int, optional): Execution order; lower values run earlier. Defaults to 100.
 
     Returns:
-        Callable: A decorator that registers the plugin class.
+        Callable[[Type[T]], Type[T]]: A decorator that registers the plugin class.
     """
     if args and len(args) == 1 and callable(args[0]):
         cls = args[0]
         return plugin_manager.register_plugin(cls, order=order)
 
-    def decorator(cls: Type) -> Type:
+    def decorator(cls: Type[T]) -> Type[T]:
         return plugin_manager.register_plugin(cls, order=order)
 
     return decorator
