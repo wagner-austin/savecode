@@ -3,7 +3,7 @@
 # Example:    make run ARGS="--git --ext js"
 # --------------------------------------------------------------------
 
-.PHONY: help venv install test lint build clean run git
+.PHONY: help venv install test lint build clean run git git-staged git-unstaged
 
 # --------------------------------------------------------------------
 # Configurable knobs (override on the CLI or define in an .env file)
@@ -52,3 +52,9 @@ run:               ## Run savecode on $(RUN_DIR) with $(EXTS)
 
 git:           ## Gather files reported by git status
 	$(PYTHON) -m savecode $(RUN_DIR) --git
+
+git-staged:        ## Gather only files that are *staged* for commit
+	$(PYTHON) -m savecode $(RUN_DIR) --git --staged --ext $(EXTS) $(ARGS)
+
+git-unstaged:      ## Gather only *unstaged* or untracked files
+	$(PYTHON) -m savecode $(RUN_DIR) --git --unstaged --ext $(EXTS) $(ARGS)

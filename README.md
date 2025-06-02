@@ -152,8 +152,14 @@ The included Makefile provides convenient shortcuts:
 # Run on current directory with default extensions
 make run
 
-# Run with Git integration
+# Run with Git integration (all changed files)
 make git
+
+# Run with Git integration (only staged files)
+make git-staged
+
+# Run with Git integration (only unstaged files)
+make git-unstaged
 
 # Run with custom arguments
 make run ARGS="--ext js html css"
