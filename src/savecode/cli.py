@@ -50,6 +50,7 @@ def main() -> None:
             "staged": args.staged,
             "unstaged": args.unstaged,
             "all_ext": args.all_ext,
+            "ext_provided": args.ext_provided,  # <── NEW
         },
     }
 

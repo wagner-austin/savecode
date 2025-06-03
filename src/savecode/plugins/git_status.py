@@ -114,9 +114,15 @@ class GitStatusPlugin:
         # apply extension filtering only if all_ext is not set
         cli_opts = context["cli_opts"]
         exts = context["extensions"]
+
+        # New default: with --git we include everything **unless** the user
+        # explicitly set --ext AND didn't override with --all-ext.
+        ext_provided = cli_opts.get("ext_provided", False)
+        include_all = cli_opts.get("all_ext") or not ext_provided
+
         allowed = (
             normalized
-            if cli_opts.get("all_ext")
+            if include_all
             else [p for p in normalized if Path(p).suffix.lstrip(".").lower() in exts]
         )
 

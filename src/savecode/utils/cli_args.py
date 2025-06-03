@@ -101,9 +101,15 @@ def parse_arguments() -> Tuple[argparse.Namespace, List[str]]:
     )
     args, extra_args = parser.parse_known_args()
 
-    # Fallback to the original default only when the user did not pass --ext
-    if not args.ext:
+    # Did the caller explicitly give --ext/--extensions?
+    ext_provided = args.ext is not None          # <── NEW
+
+    # If not, fall back to the historical default ("py")
+    if not ext_provided:
         args.ext = ["py"]
+
+    # Stash the flag so plugins can see it
+    setattr(args, "ext_provided", ext_provided)  # <── NEW
 
     # Append positional source arguments into roots/files lists.
     for src in args.source:
