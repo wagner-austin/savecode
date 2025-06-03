@@ -102,7 +102,7 @@ def parse_arguments() -> Tuple[argparse.Namespace, List[str]]:
     args, extra_args = parser.parse_known_args()
 
     # Did the caller explicitly give --ext/--extensions?
-    ext_provided = args.ext is not None          # <── NEW
+    ext_provided = args.ext is not None  # <── NEW
 
     # If not, fall back to the historical default ("py")
     if not ext_provided:

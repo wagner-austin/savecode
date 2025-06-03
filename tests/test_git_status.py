@@ -76,7 +76,9 @@ def test_git_status_plugin_with_all_ext_flag() -> None:
         assert str(root / "file1.py") in context["all_files"]
         assert str(root / "file2.js") in context["all_files"]
         assert str(root / "file3.py") in context["all_files"]
-        assert str(root / "file4.txt") in context["all_files"]  # Now included by default
+        assert (
+            str(root / "file4.txt") in context["all_files"]
+        )  # Now included by default
         assert str(root / "file5.md") in context["all_files"]  # Now included by default
         assert str(root / "Makefile") in context["all_files"]  # Now included by default
 
@@ -113,7 +115,7 @@ def test_git_status_respects_explicit_ext() -> None:
             "cli_opts": {
                 "git": True,
                 "all_ext": False,
-                "ext_provided": True,      # ← simulate --ext py js
+                "ext_provided": True,  # ← simulate --ext py js
             },
             "extensions": ["py", "js"],
             "errors": [],
