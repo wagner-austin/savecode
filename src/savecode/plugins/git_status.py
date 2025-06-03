@@ -1,5 +1,8 @@
 """
 savecode/plugins/git_status.py – gather files reported by `git status --porcelain`.
+
+Note: Git porcelain format may include deleted files, so we filter to only include files
+that still exist in the working tree.
 """
 
 import subprocess
@@ -13,6 +16,16 @@ from savecode.utils.path_utils import normalize_path
 from savecode.utils.error_handler import log_and_record_error
 
 logger = logging.getLogger("savecode.plugins.git_status")
+
+__all__ = ["_git_root", "_git_changed", "_only_existing", "GitStatusPlugin"]
+
+
+def _only_existing(paths: List[Path]) -> List[Path]:
+    """Return only paths that still exist in the working tree."""
+    # Use the *un-bound* Path.exists so the tests' mock (which expects
+    # the path object as an argument) works without hitting a binding
+    # mismatch.
+    return [p for p in paths if Path.exists(p)]
 
 
 def _git_root(start: Path) -> Path | None:
@@ -39,6 +52,9 @@ def _git_changed(root: Path, staged: bool, unstaged: bool) -> List[Path]:
     for line in lines:
         # porcelain format: XY <path>
         status = line[:2]
+        # Ignore deletions (either staged or unstaged)
+        if "D" in status:
+            continue
         path = line[3:]
         if status == "??" and not staged:  # untracked
             changed.append(root / path)
@@ -92,7 +108,8 @@ class GitStatusPlugin:
 
         files = _git_changed(repo_root, staged, unstaged)
         # normalize paths from git output
-        normalized = [normalize_path(str(p)) for p in files]
+        # Drop paths that have vanished from the working tree
+        normalized = [normalize_path(str(p)) for p in _only_existing(files)]
 
         # apply extension filtering only if all_ext is not set
         cli_opts = context["cli_opts"]

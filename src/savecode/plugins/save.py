@@ -52,6 +52,16 @@ class SavePlugin:
                     rel_path = relative_path(file)
                     summary_lines.append(f"- {rel_path}")
 
+                    # Skip if the file no longer exists (e.g. deleted after git reported it)
+                    if not Path(file).exists():
+                        log_and_record_error(
+                            f"{file} does not exist – skipped",
+                            context,
+                            logger,
+                            level="warning",
+                        )
+                        continue
+
                     # Check file size before processing
                     if Path(file).stat().st_size > MAX_SIZE_MB * 1024 * 1024:
                         log_and_record_error(
