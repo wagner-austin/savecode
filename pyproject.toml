@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "savecode"
-version = "2.1.4"
+version = "2.1.5"
 description = "A utility to save source code from directories and files into a single output file with smart file filtering, streaming, and progress tracking."
 readme = "README.md"
 requires-python = ">=3.11"
