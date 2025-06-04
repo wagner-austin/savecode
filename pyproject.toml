@@ -30,5 +30,17 @@ dependencies = [
 "Homepage" = "https://github.com/wagner-austin/savecode"
 "Bug Tracker" = "https://github.com/wagner-austin/savecode/issues"
 
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio",
+    "pytest-env",
+    "ruff>=0.4",
+    "black>=24.3",
+    "mypy>=1.10",
+    "build",
+    "twine",
+]
+
 [project.scripts]
 savecode = "savecode.cli:main"

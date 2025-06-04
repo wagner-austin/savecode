@@ -13,12 +13,13 @@ ENV_DIR ?= .venv
 EXTS   ?= py toml ini sh ps1 html css js ini
 RUN_DIR ?= .
 
-# ─── Makefile (top section, right after the other variable block) ─────────────
-VENV_PY := $(ENV_DIR)/bin/python
-VENV_PIP := $(ENV_DIR)/bin/pip
-ifdef OS                 # Windows sets OS=Windows_NT
-    VENV_PY := $(ENV_DIR)/Scripts/python.exe
+# Choose the right paths for the venv executables on any OS
+ifeq ($(OS),Windows_NT)
+    VENV_PY  := $(ENV_DIR)/Scripts/python.exe
     VENV_PIP := $(ENV_DIR)/Scripts/pip.exe
+else
+    VENV_PY  := $(ENV_DIR)/bin/python
+    VENV_PIP := $(ENV_DIR)/bin/pip
 endif
 
 # Default goal -------------------------------------------------------
@@ -37,8 +38,8 @@ venv:              ## Create / refresh local virtual-env
 install: venv      ## Install this package in editable mode + dev deps
 	$(VENV_PIP) install -e .[dev]
 
-test:              ## Run the test-suite
-	$(PYTHON) -m pytest
+test: install          ## Run the test-suite
+	$(VENV_PY) -m pytest
 
 lint:              ## Ruff -> Black -> MyPy (stop on first failure)
 	ruff check --fix
