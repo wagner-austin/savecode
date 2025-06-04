@@ -13,6 +13,14 @@ ENV_DIR ?= .venv
 EXTS   ?= py toml ini sh ps1 html css js ini
 RUN_DIR ?= .
 
+# ─── Makefile (top section, right after the other variable block) ─────────────
+VENV_PY := $(ENV_DIR)/bin/python
+VENV_PIP := $(ENV_DIR)/bin/pip
+ifdef OS                 # Windows sets OS=Windows_NT
+    VENV_PY := $(ENV_DIR)/Scripts/python.exe
+    VENV_PIP := $(ENV_DIR)/Scripts/pip.exe
+endif
+
 # Default goal -------------------------------------------------------
 .DEFAULT_GOAL := help
 
@@ -24,10 +32,10 @@ help:              ## Show this help
 
 venv:              ## Create / refresh local virtual-env
 	$(PYTHON) -m venv $(ENV_DIR)
-	$(ENV_DIR)/bin/pip install -U pip
+	$(VENV_PY) -m pip install -U pip
 
 install: venv      ## Install this package in editable mode + dev deps
-	$(ENV_DIR)/bin/pip install -e .[dev]
+	$(VENV_PIP) install -e .[dev]
 
 test:              ## Run the test-suite
 	$(PYTHON) -m pytest
