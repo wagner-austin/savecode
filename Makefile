@@ -1,101 +1,79 @@
-# Makefile ────────────────────────────────────────────────────────────
-# Usage:      make <target> [VAR=value]
-# Example:    make run ARGS="--git --ext js"
-# --------------------------------------------------------------------
+# Makefile ───────────────────────────────────────────────────────────
+# Usage:     make <target> [VAR=value]
+# Example:   make run ARGS="--git --ext js"
+# -------------------------------------------------------------------
 
-.PHONY: help venv install test lint build clean run git git-staged git-unstaged release
-
-# --------------------------------------------------------------------
-# Configurable knobs (override on the CLI or define in an .env file)
-# --------------------------------------------------------------------
-PYTHON ?= python
-ENV_DIR ?= .venv
-EXTS   ?= py toml ini sh ps1 html css js ini
+# ───────── configurable knobs (override on CLI or via env) ─────────
+ifeq ($(OS),Windows_NT)
+    PYTHON = py
+else
+    PYTHON ?= python3          # rely on whatever python is on PATH
+endif
+EXTS   ?= py toml ini sh ps1 html css js
 RUN_DIR ?= .
 
-# Choose the right paths for the venv executables on any OS
-ifeq ($(OS),Windows_NT)
-    VENV_PY  := $(ENV_DIR)/Scripts/python.exe
-    VENV_PIP := $(ENV_DIR)/Scripts/pip.exe
-else
-    VENV_PY  := $(ENV_DIR)/bin/python
-    VENV_PIP := $(ENV_DIR)/bin/pip
-endif
-
-# Default goal -------------------------------------------------------
+# default goal
 .DEFAULT_GOAL := help
 
-# --------------------------------------------------------------------
-# Helper: build venv only when .venv/pyvenv.cfg is absent
-# --------------------------------------------------------------------
-$(ENV_DIR)/pyvenv.cfg:
-	$(PYTHON) -m venv $(ENV_DIR)
-	$(VENV_PY) -m pip install -U pip
-	$(VENV_PIP) install -e .[dev]
-
-# --------------------------------------------------------------------
+# -------------------------------------------------------------------
 # Targets
-# --------------------------------------------------------------------
-help:              ## Show this help message
+# -------------------------------------------------------------------
+.PHONY: help install test lint build clean run \
+        git git-staged git-unstaged release
+
+help:               ## Show this help message
 	@echo "---------------------------------------------------------------------"
 	@echo "Savecode Makefile - Available commands:"
 	@echo "---------------------------------------------------------------------"
-	@echo "Usage: make [target]"
-	@echo ""
-	@echo "Targets:"
-	@echo "  help                  Show this help message."
-	@echo "  venv                  Create / refresh local virtual-env (part of install)."
-	@echo "  install               Install project in editable mode + dev deps."
-	@echo "  test                  Run the test-suite (ensures venv and deps are installed)."
-	@echo "  lint                  Run linters (ruff, black, mypy)."
-	@echo "  build                 Build sdist + wheel."
-	@echo "  clean                 Remove build artefacts, .pytest_cache, and .venv."
-	@echo "  run                   Run the savecode application (e.g., make run ARGS='--output custom.txt')."
-	@echo "  release               (Placeholder - typically involves tagging, building, and uploading)."
+	@echo "  help          Show this help message."
+	@echo "  install       pip-install the project in editable mode + dev deps."
+	@echo "  test          Run the test-suite."
+	@echo "  lint          Run Ruff, Black, and MyPy."
+	@echo "  build         Build sdist + wheel."
+	@echo "  clean         Remove build artefacts and caches."
+	@echo "  run           Run savecode on $(RUN_DIR) with $(EXTS)."
+	@echo "  release       Build and upload to PyPI via Twine."
 	@echo "---------------------------------------------------------------------"
 
-venv:              ## Create / refresh local virtual-env
-	$(PYTHON) -m venv $(ENV_DIR)
-	$(VENV_PY) -m pip install -U pip
+install:            ## Install this package in editable mode + dev deps
+	$(PYTHON) -m pip install -U pip
+	$(PYTHON) -m pip install -e .[dev]
 
-install: venv      ## Install this package in editable mode + dev deps
-	$(VENV_PIP) install -e .[dev]
+test:               ## Run the test-suite
+	$(PYTHON) -m pytest
 
-test: $(ENV_DIR)/pyvenv.cfg  ## Run the test-suite
-	$(VENV_PY) -m pytest
-
-lint:              ## Ruff -> Black -> MyPy (stop on first failure)
+lint:               ## Ruff → Black → MyPy (stop on first failure)
 	ruff check --fix
 	ruff format
 	black .
 	mypy --strict .
 
-build:             ## Build sdist + wheel
+build:              ## Build sdist + wheel
 	$(PYTHON) -m build
 
-# Python rm -rf macro for cross-platform directory removal
+# ─── Cross-platform “rm -rf” helper ─────────────────────────────────
 define rmdir
-$(PYTHON) -c "import shutil, os, glob; [shutil.rmtree(d, ignore_errors=True) for d in glob.glob('$(1)') if os.path.isdir(d)]"
+$(PYTHON) -c "import os, glob, shutil, sys; \
+    [shutil.rmtree(p, ignore_errors=True)                         \
+     for pat in sys.argv[1:]                                      \
+     for p   in glob.glob(pat)                                    \
+     if os.path.isdir(p)]" $(1)
 endef
 
-clean:             ## Remove build artefacts
-	$(call rmdir,dist)
-	$(call rmdir,.venv)
-	$(call rmdir,build)
-	$(call rmdir,*.egg-info)
-	$(call rmdir,.pytest_cache)
+clean:              ## Remove build artefacts & caches
+	$(call rmdir,dist build *.egg-info .pytest_cache)
 
-run:               ## Run savecode on $(RUN_DIR) with $(EXTS)
+run:                ## Run savecode on $(RUN_DIR) with $(EXTS)
 	$(PYTHON) -m savecode $(RUN_DIR) --ext $(EXTS) $(ARGS)
 
-git:               ## Gather all modified/untracked files
+git:                ## Gather all modified/untracked files
 	$(PYTHON) -m savecode $(RUN_DIR) --git --all-ext $(ARGS)
 
-git-staged:        ## Gather only files that are *staged* for commit
+git-staged:         ## Gather only files that are *staged* for commit
 	$(PYTHON) -m savecode $(RUN_DIR) --git --staged --all-ext $(ARGS)
 
-git-unstaged:      ## Gather only *unstaged* or untracked files
+git-unstaged:       ## Gather only *unstaged* or untracked files
 	$(PYTHON) -m savecode $(RUN_DIR) --git --unstaged --all-ext $(ARGS)
 
-release: build    ## Build and upload to PyPI via Twine
+release: build      ## Build and upload to PyPI via Twine
 	$(PYTHON) -m twine upload dist/*
