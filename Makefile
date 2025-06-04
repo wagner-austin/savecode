@@ -26,10 +26,33 @@ endif
 .DEFAULT_GOAL := help
 
 # --------------------------------------------------------------------
+# Helper: build venv only when .venv/pyvenv.cfg is absent
+# --------------------------------------------------------------------
+$(ENV_DIR)/pyvenv.cfg:
+	$(PYTHON) -m venv $(ENV_DIR)
+	$(VENV_PY) -m pip install -U pip
+	$(VENV_PIP) install -e .[dev]
+
+# --------------------------------------------------------------------
 # Targets
 # --------------------------------------------------------------------
-help:              ## Show this help
-	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-16s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
+help:              ## Show this help message
+	@echo "---------------------------------------------------------------------"
+	@echo "Savecode Makefile - Available commands:"
+	@echo "---------------------------------------------------------------------"
+	@echo "Usage: make [target]"
+	@echo ""
+	@echo "Targets:"
+	@echo "  help                  Show this help message."
+	@echo "  venv                  Create / refresh local virtual-env (part of install)."
+	@echo "  install               Install project in editable mode + dev deps."
+	@echo "  test                  Run the test-suite (ensures venv and deps are installed)."
+	@echo "  lint                  Run linters (ruff, black, mypy)."
+	@echo "  build                 Build sdist + wheel."
+	@echo "  clean                 Remove build artefacts, .pytest_cache, and .venv."
+	@echo "  run                   Run the savecode application (e.g., make run ARGS='--output custom.txt')."
+	@echo "  release               (Placeholder - typically involves tagging, building, and uploading)."
+	@echo "---------------------------------------------------------------------"
 
 venv:              ## Create / refresh local virtual-env
 	$(PYTHON) -m venv $(ENV_DIR)
@@ -38,7 +61,7 @@ venv:              ## Create / refresh local virtual-env
 install: venv      ## Install this package in editable mode + dev deps
 	$(VENV_PIP) install -e .[dev]
 
-test: install          ## Run the test-suite
+test: $(ENV_DIR)/pyvenv.cfg  ## Run the test-suite
 	$(VENV_PY) -m pytest
 
 lint:              ## Ruff -> Black -> MyPy (stop on first failure)
@@ -57,6 +80,7 @@ endef
 
 clean:             ## Remove build artefacts
 	$(call rmdir,dist)
+	$(call rmdir,.venv)
 	$(call rmdir,build)
 	$(call rmdir,*.egg-info)
 	$(call rmdir,.pytest_cache)

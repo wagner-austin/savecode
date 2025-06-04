@@ -6,6 +6,7 @@ to a designated output file, aggregating any errors encountered during file oper
 
 import logging
 from typing import Any, Dict, List
+from io import StringIO
 from pathlib import Path
 from tqdm import tqdm
 from savecode.plugin_manager.manager import register_plugin
@@ -26,7 +27,7 @@ class SavePlugin:
 
     @handle_plugin_errors
     def run(self, context: Dict[str, Any]) -> None:
-        """Execute the saving process in a single pass.
+        """Execute the saving process using an in-memory buffer.
 
         Expects in context:
           - 'all_files': List of source file paths.
@@ -42,78 +43,71 @@ class SavePlugin:
         """
         gathered: List[str] = context.get("all_files", [])
         output_file: str = context.get("output", "./temp.txt")
+
+        buffer = StringIO()
+        summary_details = []  # Stores paths for the summary
+
         try:
-            summary_lines = ["Files saved:"]
+            for file in tqdm(gathered, desc="Processing files", unit="file"):
+                rel_path = relative_path(file)
 
-            # Open output file for both reading and writing
-            with open(output_file, "w+", encoding="utf-8") as out:
-                # Write the initial summary header
-                for file in tqdm(gathered, desc="Processing files", unit="file"):
-                    rel_path = relative_path(file)
-                    summary_lines.append(f"- {rel_path}")
+                if not Path(file).exists():
+                    log_and_record_error(
+                        f"{file} does not exist – skipped",
+                        context,
+                        logger,
+                        level="warning",
+                    )
+                    continue
 
-                    # Skip if the file no longer exists (e.g. deleted after git reported it)
-                    if not Path(file).exists():
-                        log_and_record_error(
-                            f"{file} does not exist – skipped",
-                            context,
-                            logger,
-                            level="warning",
-                        )
-                        continue
+                if Path(file).stat().st_size > MAX_SIZE_MB * 1024 * 1024:
+                    log_and_record_error(
+                        f"Skipped {file} (>{MAX_SIZE_MB} MB)",
+                        context,
+                        logger,
+                        level="warning",
+                    )
+                    continue
 
-                    # Check file size before processing
-                    if Path(file).stat().st_size > MAX_SIZE_MB * 1024 * 1024:
-                        log_and_record_error(
-                            f"Skipped {file} (>{MAX_SIZE_MB} MB)",
-                            context,
-                            logger,
-                            level="warning",
-                        )
-                        continue
+                try:
+                    header = f"File: {rel_path}\n\n"
+                    buffer.write(header)
+                    with open(file, "r", encoding="utf-8", errors="replace") as f:
+                        for chunk in iter(lambda: f.read(8192), ""):  # 8 KB chunks
+                            buffer.write(chunk)
+                    buffer.write("\n\n")
+                    summary_details.append(f"- {rel_path}")
+                except Exception as e:
+                    error_msg = f"Error reading {file}: {e}"
+                    log_and_record_error(error_msg, context, logger, exc_info=True)
 
-                    try:
-                        # Write the file header
-                        header = f"\nFile: {rel_path}\n\n"
-                        out.write(header)
+            file_count = len(summary_details)
+            banner = "Files saved ({}):\n{}\n\n".format(
+                file_count, "\n".join(summary_details)
+            )
 
-                        # Stream the file content in chunks
-                        with open(file, "r", encoding="utf-8", errors="replace") as f:
-                            for chunk in iter(lambda: f.read(8192), ""):  # 8 KB chunks
-                                out.write(chunk)
-
-                        # Add a separator after each file
-                        out.write("\n\n")
-                    except Exception as e:
-                        error_msg = f"Error reading {file}: {e}"
-                        log_and_record_error(error_msg, context, logger, exc_info=True)
-
-                # Write the summary at the beginning of the file
-                # Go back to the beginning of the file
-                out.seek(0)
-
-                # Write the summary with file count
-                file_count = len(summary_lines) - 1  # Subtract 1 for the header line
-                summary_lines[0] = f"Files saved ({file_count}):"
-                summary_text = "\n".join(summary_lines) + "\n\n"
-                out.write(summary_text)
-
-                # Go to the end of the file to add a footer
-                out.seek(0, 2)  # Seek to the end of the file
+            # Now write everything to the output file
+            with open(output_file, "w", encoding="utf-8") as out:
+                out.write(banner)
+                out.write(buffer.getvalue())
                 footer = f"\nSaved code from {file_count} files to {output_file}\n"
                 out.write(footer)
 
-                # Read complete output for clipboard
-                out.seek(0)
-                complete_output = out.read()
-
-                # Copy to clipboard
-                copy_clipboard(complete_output)
-                logger.info("Copied concatenated code to clipboard.")
+            # Prepare complete output for clipboard
+            complete_output = banner + buffer.getvalue() + footer
+            copy_clipboard(
+                complete_output.strip()
+            )  # Strip to avoid extra newlines if footer/banner have them
+            logger.info("Copied concatenated code to clipboard.")
 
         except Exception as e:
-            error_msg = f"Error writing to output file {output_file}: {e}"
+            # Preserve legacy wording so existing tests/users can grep for it
+            error_msg = (
+                f"Error writing to output file {output_file}: {e} (during save process)"
+            )
             log_and_record_error(error_msg, context, logger, exc_info=True)
+        finally:
+            buffer.close()  # Ensure StringIO buffer is closed
 
 
 # End of savecode/plugins/save.py
